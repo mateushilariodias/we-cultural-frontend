@@ -20,22 +20,63 @@ const categorias = [
 ];
 
 export default function Cadastro() {
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+ const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    const data = new FormData(e.target as HTMLFormElement);
+  const form = e.target as HTMLFormElement;
+  const data = new FormData(form);
 
-    const res = await fetch("http://localhost:5000/api/artists", {
-      method: "POST",
-      body: data,
-    });
+  // Transformando checkboxes booleanos
+  const parseBoolean = (value: FormDataEntryValue | null) => value === "on";
 
-    if (res.ok) {
-      alert("Cadastro realizado com sucesso!");
-    } else {
-      alert("Erro no cadastro, tente novamente.");
-    }
+  // Criando um objeto para enviar
+  const payload = {
+    name: data.get("name"),
+    birthDate: data.get("birthDate"),
+    email: data.get("email"),
+    phone: data.get("phone"),
+    socialLink: data.get("socialLink"),
+    resumeLink: data.get("resumeLink"),
+    portfolioLink: data.get("portfolioLink"),
+    gender: data.get("gender"),
+    password: data.get("password"),
+    lgbtqiapn: parseBoolean(data.get("lgbtqiapn")),
+    black: parseBoolean(data.get("black")),
+    indigenous: parseBoolean(data.get("indigenous")),
+    pcd: parseBoolean(data.get("pcd")),
+    categories: data.getAll("categories"),
   };
+
+  // Para enviar o arquivo junto
+  const submitData = new FormData();
+  Object.entries(payload).forEach(([key, value]) => {
+    if (key === "profilePicture") return; // será anexado separadamente
+    if (Array.isArray(value)) {
+      value.forEach((v) => submitData.append(key, v.toString()));
+    } else if (value !== null) {
+      submitData.append(key, value.toString());
+    }
+  });
+
+  // Adicionando arquivo
+  const fileInput = form.querySelector<HTMLInputElement>('input[name="profilePicture"]');
+  if (fileInput?.files?.[0]) {
+    submitData.append("profilePicture", fileInput.files[0]);
+  }
+
+  // Enviando para o backend
+  const res = await fetch("http://localhost:5000/api/artists", {
+    method: "POST",
+    body: submitData,
+  });
+
+  if (res.ok) {
+    alert("Cadastro realizado com sucesso!");
+  } else {
+    alert("Erro no cadastro, tente novamente.");
+  }
+};
+
 
   return (
     <div className="max-w-2xl mx-auto p-4">

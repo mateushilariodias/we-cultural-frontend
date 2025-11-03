@@ -8,16 +8,16 @@ export default function Header() {
   return (
     <header className="bg-bluePrimary text-white px-4 lg:px-40 py-3 flex justify-between items-center">
       {/* Logo */}
-      <h1 className="text-2xl font-bold">Eu Cultural</h1>
+      <h1 className="text-2xl font-bold">Nós Cultural</h1>
 
       {/* Menu desktop */}
       <nav className="hidden md:flex gap-6 items-center">
         <a href="/artistLogin" className="hover:underline">Ver Artistas</a>
         <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
-          Cadastrar
+          Cadastrar Artista
         </a>
         <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
-          Login
+          Login de Artista
         </a>
       </nav>
 
