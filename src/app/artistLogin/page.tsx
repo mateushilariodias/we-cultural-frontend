@@ -17,9 +17,7 @@ export default function Login() {
     try {
       const res = await fetch("http://localhost:5000/api/auth/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
@@ -31,18 +29,15 @@ export default function Login() {
         return;
       }
 
-      // Armazenar token JWT no localStorage
+      // Armazena token
       localStorage.setItem("token", data.token);
 
       alert("Login realizado com sucesso!");
-      setLoading(false);
-
-      // Redirecionar para a página do artista (dashboard)
-      router.push("/dashboard"); // Crie essa página depois
-
+      router.push("/dashboard");
     } catch (error) {
       console.error(error);
       alert("Erro ao conectar com o servidor.");
+    } finally {
       setLoading(false);
     }
   };
@@ -64,7 +59,7 @@ export default function Login() {
           <FormInput
             label="Senha"
             type="password"
-            name="senha"
+            name="password"
             placeholder="Digite sua senha"
             required
             value={password}
