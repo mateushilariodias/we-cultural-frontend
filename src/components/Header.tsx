@@ -12,7 +12,7 @@ export default function Header() {
 
       {/* Menu desktop */}
       <nav className="hidden md:flex gap-6 items-center">
-        <a href="/artistLogin" className="hover:underline">Ver Artistas</a>
+        <a href="/search" className="hover:underline">Ver Artistas</a>
         <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
           Cadastrar Artista
         </a>
@@ -32,7 +32,7 @@ export default function Header() {
       {/* Menu mobile */}
       {menuOpen && (
         <div className="bg-bluePrimary absolute top-14 left-0 w-full flex flex-col gap-4 p-4 md:hidden">
-          <a href="/artistas" className="hover:underline">Ver Artistas</a>
+          <a href="/search" className="hover:underline">Ver Artistas</a>
           <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600 text-center">
             Cadastrar
           </a>

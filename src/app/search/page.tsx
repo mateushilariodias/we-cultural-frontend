@@ -1,74 +1,114 @@
 "use client";
 
-import { useState } from "react";
-import axios from "axios";
-import Link from "next/link";
-
-interface Result {
-  id: string;
-  type: "artist" | "collective" | "equipment";
-  name: string;
-  profilePicture?: string;
-}
+import { useEffect, useState } from "react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<Result[]>([]);
+  const [artists, setArtists] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleSearch = async () => {
-    if (!query.trim()) return;
-    setLoading(true);
-    try {
-      const { data } = await axios.get<Result[]>(`http://localhost:5000/api/search?q=${query}`);
-      setResults(data);
-    } catch (err) {
-      console.error("Erro ao buscar:", err);
+  useEffect(() => {
+    if (!query.trim()) {
+      setArtists([]);
+      return;
     }
-    setLoading(false);
-  };
+
+    const timeout = setTimeout(() => {
+      searchArtists(query);
+    }, 400);
+
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  async function searchArtists(text: string) {
+    try {
+      setLoading(true);
+
+      const res = await fetch(
+        `http://localhost:5000/api/artists/search?query=${text}`
+      );
+
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        setArtists(data);
+      } else if (Array.isArray(data.artists)) {
+        setArtists(data.artists);
+      } else {
+        setArtists([]);
+      }
+    } catch (err) {
+      console.error(err);
+      setArtists([]);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Buscar artistas, coletivos e equipamentos</h1>
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          placeholder="Digite um nome..."
-          className="flex-1 border rounded-lg p-2"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-        <button
-          onClick={handleSearch}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-        >
-          Buscar
-        </button>
-      </div>
+    <div className="min-h-screen bg-gray-50 px-4 lg:px-40 py-10">
+      <h1 className="text-3xl font-bold text-bluePrimary mb-6">
+        Buscar Artistas
+      </h1>
 
-      {loading && <p>Carregando...</p>}
+      {/* 🔍 Campo de busca */}
+      <input
+        type="text"
+        placeholder="Digite o nome do artista..."
+        className="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-bluePrimary text-gray-800"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
 
-      <div className="grid grid-cols-1 gap-4">
-        {results.map((item) => (
-          <Link
-            key={item.id}
-            href={`/perfil/${item.id}?type=${item.type}`}
-            className="flex items-center gap-4 border p-3 rounded-lg hover:bg-gray-100"
+      {loading && (
+        <p className="mt-4 text-bluePrimary font-medium">Buscando...</p>
+      )}
+
+      {/* Resultados */}
+      <div className="flex flex-col gap-4 mt-6">
+        {artists.map((artist) => (
+          <a
+            key={artist._id}
+            href={`/artist/${artist._id}`}
+            className="bg-white border border-gray-200 rounded-xl shadow hover:shadow-md hover:bg-gray-100 transition p-4 block"
           >
-            <img
-              src={item.profilePicture || "/default-avatar.png"}
-              alt={item.name}
-              className="w-12 h-12 rounded-full object-cover"
-            />
-            <div>
-              <p className="font-semibold">{item.name}</p>
-              <p className="text-sm text-gray-500">
-                {item.type === "artist" ? "Artista" : item.type === "collective" ? "Coletivo" : "Equipamento"}
-              </p>
+            <div className="flex items-center gap-4">
+              {artist.profilePicture ? (
+                <img
+                  src={artist.profilePicture}
+                  alt={artist.name}
+                  className="w-16 h-16 rounded-full object-cover border border-gray-300"
+                />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-bold">
+                  ?
+                </div>
+              )}
+
+              <div>
+                <h2 className="text-lg font-semibold text-bluePrimary">
+                  {artist.name}
+                </h2>
+
+                {/* Mostrar categorias em vez de gênero */}
+                {artist.categories && artist.categories.length > 0 ? (
+                  <p className="text-gray-600 text-sm">
+                    {artist.categories.join(", ")}
+                  </p>
+                ) : (
+                  <p className="text-gray-500 text-sm">Sem categorias</p>
+                )}
+              </div>
             </div>
-          </Link>
+          </a>
         ))}
+
+        {/* Mensagem caso não encontre nada */}
+        {!loading && query.trim() && artists.length === 0 && (
+          <p className="text-gray-600 text-center mt-6">
+            Nenhum artista encontrado para "<strong>{query}</strong>".
+          </p>
+        )}
       </div>
     </div>
   );
