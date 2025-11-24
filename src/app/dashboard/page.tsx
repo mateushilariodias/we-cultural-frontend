@@ -4,13 +4,13 @@ import {
   PieChart, Pie, Cell, Tooltip, Legend, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer 
 } from "recharts";
+import { API_ENDPOINTS } from "@/config/api";
 
 const COLORS = {
   primary: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'],
   diversity: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444']
 };
 
-// Definir interfaces para os tipos
 interface Totais {
   totalArtistas: number;
   totalColetivos: number;
@@ -19,9 +19,7 @@ interface Totais {
 
 interface ArtistaPorGenero {
   genero: string;
-  _count: {
-    genero: number;
-  };
+  _count: { genero: number; };
 }
 
 interface ArtistaDiversidade {
@@ -50,7 +48,7 @@ export default function Dashboard() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/stats")
+    fetch(API_ENDPOINTS.stats)
       .then((res) => res.json())
       .then((data: Stats) => {
         setStats(data);
@@ -66,7 +64,6 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="flex flex-col w-full min-h-screen">
-        {/* Header */}
         <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-3 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-6 items-center">
@@ -79,16 +76,12 @@ export default function Dashboard() {
             </a>
           </nav>
         </header>
-
-        {/* Loading */}
         <div className="flex-1 flex items-center justify-center bg-gray-50">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e3a8a] mx-auto mb-4"></div>
             <p className="text-gray-600">Carregando estatísticas...</p>
           </div>
         </div>
-
-        {/* Footer */}
         <footer className="bg-[#1e3a8a] text-white text-center p-4">
           <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
         </footer>
@@ -116,7 +109,6 @@ export default function Dashboard() {
 
   if (!stats) return null;
 
-  // Preparar dados para os gráficos
   const generoData = stats.artistasPorGenero.map((g) => ({
     name: g.genero || "Não informado",
     value: g._count.genero,
@@ -136,7 +128,6 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      {/* Header */}
       <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-3 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Nós Cultural</h1>
         <nav className="hidden md:flex gap-6 items-center">
@@ -150,28 +141,19 @@ export default function Dashboard() {
         </nav>
       </header>
 
-      {/* Main Content */}
       <main className="flex-1 bg-gray-50 py-8 lg:py-12">
         <div className="max-w-6xl mx-auto px-4 lg:px-8">
-          {/* Título */}
           <div className="mb-8 text-center lg:text-left">
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-2">
-              Dashboard Geral
-            </h1>
-            <p className="text-lg text-gray-600">
-              Estatísticas do cenário cultural Francano
-            </p>
+            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-2">Dashboard Geral</h1>
+            <p className="text-lg text-gray-600">Estatísticas do cenário cultural Francano</p>
           </div>
 
-          {/* Cards de Totais */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div className="bg-white rounded-lg shadow-md p-6 border-l-4 border-[#1e3a8a]">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-500 text-sm font-medium">Total de Artistas</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {stats.totais.totalArtistas}
-                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totais.totalArtistas}</p>
                 </div>
                 <div className="bg-blue-100 rounded-full p-3">
                   <svg className="w-8 h-8 text-[#1e3a8a]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,9 +167,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-500 text-sm font-medium">Coletivos</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {stats.totais.totalColetivos}
-                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totais.totalColetivos}</p>
                 </div>
                 <div className="bg-green-100 rounded-full p-3">
                   <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,9 +181,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-gray-500 text-sm font-medium">Equipamentos</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">
-                    {stats.totais.totalEquipamentos}
-                  </p>
+                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totais.totalEquipamentos}</p>
                 </div>
                 <div className="bg-yellow-100 rounded-full p-3">
                   <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -214,13 +192,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Gráficos */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            {/* Distribuição por Gênero */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Distribuição por Gênero
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Distribuição por Gênero</h2>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -246,11 +220,8 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </div>
 
-            {/* Faixa Etária */}
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Distribuição por Faixa Etária
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Distribuição por Faixa Etária</h2>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={faixaEtariaData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -267,11 +238,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Cards de Diversidade */}
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Indicadores de Diversidade
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900 mb-6">Indicadores de Diversidade</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {diversidadeData.map((item, index) => (
                 <div 
@@ -293,12 +261,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Top Categorias */}
           {stats.topCategorias && stats.topCategorias.length > 0 && (
             <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-4">
-                Top 5 Categorias
-              </h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Top 5 Categorias</h2>
               <div className="space-y-3">
                 {stats.topCategorias.map((cat, index) => (
                   <div key={cat.categoria} className="flex items-center">
@@ -313,9 +278,7 @@ export default function Dashboard() {
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div 
                           className="bg-[#1e3a8a] h-2 rounded-full transition-all"
-                          style={{ 
-                            width: `${(cat.total / stats.totais.totalArtistas) * 100}%` 
-                          }}
+                          style={{ width: `${(cat.total / stats.totais.totalArtistas) * 100}%` }}
                         />
                       </div>
                     </div>
@@ -327,7 +290,6 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="bg-[#1e3a8a] text-white text-center p-4">
         <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
         <p className="mt-2">

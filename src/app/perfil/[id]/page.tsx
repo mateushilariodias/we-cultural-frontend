@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
+import { API_URL } from "@/config/api";
 
 interface Profile {
   name: string;
@@ -33,7 +34,7 @@ export default function ProfilePage({
 
     const fetchProfile = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/${type}s/${id}`);
+        const { data } = await axios.get(`${API_URL}/api/${type}s/${id}`);
         setProfile(data);
       } catch (err) {
         console.error("Erro ao buscar perfil:", err);

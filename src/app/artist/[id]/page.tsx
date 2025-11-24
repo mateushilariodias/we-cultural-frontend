@@ -1,16 +1,38 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
+import { API_ENDPOINTS } from "@/config/api";
 
-export default function ArtistProfile({ params }: any) {
-  const { id } = params;
-  const [artist, setArtist] = useState<any>(null);
+interface Artist {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  gender: string;
+  profilePicture?: string;
+  categories?: string[];
+  lgbtqiapn?: boolean;
+  black?: boolean;
+  indigenous?: boolean;
+  pcd?: boolean;
+  portfolioLink?: string;
+  resumeLink?: string;
+  socialLink?: string;
+}
+
+export default function ArtistProfile({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { id } = use(params);
+  const [artist, setArtist] = useState<Artist | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchArtist() {
       try {
-        const res = await fetch(`http://localhost:5000/api/artists/${id}`);
+        const res = await fetch(API_ENDPOINTS.artistById(id));
         const data = await res.json();
         setArtist(data);
       } catch (err) {
@@ -87,14 +109,14 @@ export default function ArtistProfile({ params }: any) {
         <div className="flex flex-col gap-4 text-lg">
           <div>
             <strong>Portfólio:</strong>
-            <a href={artist.portfolioLink} target="_blank" className="ml-2 text-bluePrimary underline">
+            <a href={artist.portfolioLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-bluePrimary underline">
               Abrir
             </a>
           </div>
 
           <div>
             <strong>Currículo:</strong>
-            <a href={artist.resumeLink} target="_blank" className="ml-2 text-bluePrimary underline">
+            <a href={artist.resumeLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-bluePrimary underline">
               Abrir
             </a>
           </div>
@@ -102,7 +124,7 @@ export default function ArtistProfile({ params }: any) {
           {artist.socialLink && (
             <div>
               <strong>Rede Social:</strong>
-              <a href={artist.socialLink} target="_blank" className="ml-2 text-bluePrimary underline">
+              <a href={artist.socialLink} target="_blank" rel="noopener noreferrer" className="ml-2 text-bluePrimary underline">
                 Abrir
               </a>
             </div>

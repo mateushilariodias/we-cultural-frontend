@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
 import FormInput from "@/components/FormInput";
+import { API_ENDPOINTS } from "@/config/api";
 
 const categorias = [
   "Arquitetura",
@@ -65,7 +65,7 @@ export default function Cadastro() {
   }
 
   // Enviando para o backend
-  const res = await fetch("http://localhost:5000/api/artists", {
+  const res = await fetch(API_ENDPOINTS.artists, {
     method: "POST",
     body: submitData,
   });

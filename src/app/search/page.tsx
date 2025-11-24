@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "@/config/api";
 
 // Definir o tipo do artista
 interface Artist {
@@ -32,9 +33,7 @@ export default function SearchPage() {
     try {
       setLoading(true);
 
-      const res = await fetch(
-        `http://localhost:5000/api/artists/search?query=${text}`
-      );
+      const res = await fetch(API_ENDPOINTS.artistSearch(text));
 
       const data = await res.json();
 
