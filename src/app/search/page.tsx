@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from "react";
 
+// Definir o tipo do artista
+interface Artist {
+  _id: string;
+  name: string;
+  profilePicture?: string;
+  categories?: string[];
+}
+
 export default function SearchPage() {
   const [query, setQuery] = useState("");
-  const [artists, setArtists] = useState<any[]>([]);
+  const [artists, setArtists] = useState<Artist[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -106,7 +114,7 @@ export default function SearchPage() {
         {/* Mensagem caso não encontre nada */}
         {!loading && query.trim() && artists.length === 0 && (
           <p className="text-gray-600 text-center mt-6">
-            Nenhum artista encontrado para "<strong>{query}</strong>".
+            Nenhum artista encontrado para &quot;<strong>{query}</strong>&quot;.
           </p>
         )}
       </div>
