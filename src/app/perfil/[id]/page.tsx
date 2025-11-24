@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import axios from "axios";
 
@@ -17,8 +17,12 @@ interface Profile {
   description?: string;
 }
 
-export default function ProfilePage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default function ProfilePage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { id } = use(params);
   const searchParams = useSearchParams();
   const type = searchParams.get("type");
 
