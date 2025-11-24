@@ -10,15 +10,49 @@ const COLORS = {
   diversity: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444']
 };
 
+// Definir interfaces para os tipos
+interface Totais {
+  totalArtistas: number;
+  totalColetivos: number;
+  totalEquipamentos: number;
+}
+
+interface ArtistaPorGenero {
+  genero: string;
+  _count: {
+    genero: number;
+  };
+}
+
+interface ArtistaDiversidade {
+  lgbtqiapn: number;
+  negros: number;
+  indigenas: number;
+  pcd: number;
+}
+
+interface TopCategoria {
+  categoria: string;
+  total: number;
+}
+
+interface Stats {
+  totais: Totais;
+  artistasPorGenero: ArtistaPorGenero[];
+  artistasFaixaEtaria: Record<string, number>;
+  artistasDiversidade: ArtistaDiversidade;
+  topCategorias?: TopCategoria[];
+}
+
 export default function Dashboard() {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("http://localhost:5000/api/stats")
       .then((res) => res.json())
-      .then((data) => {
+      .then((data: Stats) => {
         setStats(data);
         setLoading(false);
       })
