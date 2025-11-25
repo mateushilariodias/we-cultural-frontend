@@ -1,10 +1,12 @@
 'use client';
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { 
   PieChart, Pie, Cell, Tooltip, Legend, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer 
 } from "recharts";
 import { API_ENDPOINTS } from "@/config/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 const COLORS = {
   primary: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'],
@@ -43,6 +45,8 @@ interface Stats {
 }
 
 export default function Dashboard() {
+  const router = useRouter();
+  const { artist, logout } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -62,6 +66,11 @@ export default function Dashboard() {
         setLoading(false);
       });
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
 
   if (loading) {
     return (
@@ -132,37 +141,47 @@ export default function Dashboard() {
             <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
               Cadastrar Artista
             </a>
-            <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition">
-              Login de Artista
-            </a>
             
-            {/* Profile Icon - Desktop */}
-            <div className="relative">
-              <button 
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="w-10 h-10 rounded-full bg-white text-[#1e3a8a] flex items-center justify-center font-bold hover:bg-gray-200 transition"
-              >
-                A
-              </button>
-              
-              {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-2 z-50">
-                  <a href="/artist/profile" className="block px-4 py-2 hover:bg-gray-100">
-                    Meu Perfil
-                  </a>
-                  <a href="/artist/edit" className="block px-4 py-2 hover:bg-gray-100">
-                    Editar Perfil
-                  </a>
-                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">
-                    Excluir Conta
-                  </button>
-                  <hr className="my-2" />
-                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-100">
-                    Sair
-                  </button>
-                </div>
-              )}
-            </div>
+            {artist ? (
+              /* Profile Icon - Desktop */
+              <div className="relative">
+                <button 
+                  onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                  className="w-10 h-10 rounded-full border-2 border-white hover:border-[#F59E0B] transition overflow-hidden"
+                >
+                  {artist.profilePicture ? (
+                    <img 
+                      src={artist.profilePicture} 
+                      alt={artist.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white text-[#1e3a8a] flex items-center justify-center font-bold">
+                      {artist.name.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </button>
+                
+                {profileMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white text-gray-800 rounded-lg shadow-lg py-2 z-50">
+                    <div className="px-4 py-3 border-b">
+                      <p className="font-semibold text-gray-900">{artist.name}</p>
+                      <p className="text-sm text-gray-500 truncate">{artist.email}</p>
+                    </div>
+                    <a href="/artist/settings" className="block px-4 py-2 hover:bg-gray-100">
+                      ⚙️ Configurações
+                    </a>
+                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                      🚪 Sair
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition">
+                Login de Artista
+              </a>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -183,18 +202,42 @@ export default function Dashboard() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <nav className="md:hidden mt-4 flex flex-col gap-3 pb-4">
+            {artist && (
+              <div className="flex items-center gap-3 pb-3 border-b border-white/30">
+                {artist.profilePicture ? (
+                  <img 
+                    src={artist.profilePicture} 
+                    alt={artist.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-white"
+                  />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-white text-[#1e3a8a] flex items-center justify-center font-bold text-lg">
+                    {artist.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div>
+                  <p className="font-semibold">{artist.name}</p>
+                  <p className="text-xs text-white/80 truncate">{artist.email}</p>
+                </div>
+              </div>
+            )}
+            
             <a href="/search" className="hover:underline py-2">Ver Artistas</a>
             <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition text-center">
               Cadastrar Artista
             </a>
-            <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition text-center">
-              Login de Artista
-            </a>
-            <hr className="border-white/30" />
-            <a href="/artist/profile" className="hover:underline py-2">Meu Perfil</a>
-            <a href="/artist/edit" className="hover:underline py-2">Editar Perfil</a>
-            <button className="text-left hover:underline py-2 text-red-300">Excluir Conta</button>
-            <button className="text-left hover:underline py-2">Sair</button>
+            
+            {artist ? (
+              <>
+                <hr className="border-white/30" />
+                <a href="/artist/settings" className="hover:underline py-2">⚙️ Configurações</a>
+                <button onClick={handleLogout} className="text-left hover:underline py-2">🚪 Sair</button>
+              </>
+            ) : (
+              <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition text-center">
+                Login de Artista
+              </a>
+            )}
           </nav>
         )}
       </header>

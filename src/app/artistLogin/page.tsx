@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { API_ENDPOINTS } from "@/config/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -29,8 +31,8 @@ export default function Login() {
         return;
       }
 
-      // Armazena token
-      localStorage.setItem("token", data.token);
+      // Usa o context para fazer login
+      login(data.token);
 
       alert("Login realizado com sucesso!");
       router.push("/dashboard");
@@ -43,43 +45,48 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <section className="max-w-md w-full bg-white shadow-md rounded-lg p-6">
-        <h1 className="text-2xl font-bold mb-4">Login de Artista</h1>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <section className="max-w-md w-full bg-white shadow-lg rounded-lg p-8">
+        <h1 className="text-3xl font-bold mb-2 text-[#1e3a8a]">Login de Artista</h1>
+        <p className="text-gray-600 mb-6">Entre na sua conta</p>
         
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
           <div className="flex flex-col gap-1">
-            <label className="font-medium">E-mail *</label>
+            <label className="font-medium text-gray-700">E-mail *</label>
             <input
               type="email"
               placeholder="Digite seu e-mail"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
             />
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="font-medium">Senha *</label>
+            <label className="font-medium text-gray-700">Senha *</label>
             <input
               type="password"
               placeholder="Digite sua senha"
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
             />
           </div>
 
           <button
             type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="bg-[#1e3a8a] text-white px-4 py-3 rounded hover:bg-[#15306e] disabled:opacity-50 transition font-semibold"
             disabled={loading}
           >
             {loading ? "Entrando..." : "Entrar"}
           </button>
         </form>
+        
+        <p className="text-center mt-6 text-gray-600">
+          Não tem uma conta? <a href="/artistRegistration" className="text-[#1e3a8a] hover:underline font-semibold">Cadastre-se</a>
+        </p>
       </section>
     </div>
   );
