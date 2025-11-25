@@ -18,13 +18,13 @@ export default function Hero() {
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                         <a
-                            href="/cadastro"
+                            href="/artistRegistration"
                             className="bg-yellow-500 text-black px-6 py-3 rounded font-semibold hover:bg-yellow-600 transition"
                         >
                             Cadastrar-se como Artista
                         </a>
                         <a
-                            href="/artistas"
+                            href="/search"
                             className="border border-white px-6 py-3 rounded font-semibold hover:bg-white hover:text-black transition"
                         >
                             Ver Artistas

@@ -46,6 +46,8 @@ export default function Dashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   useEffect(() => {
     fetch(API_ENDPOINTS.stats)
@@ -66,15 +68,6 @@ export default function Dashboard() {
       <div className="flex flex-col w-full min-h-screen">
         <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-3 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
-          <nav className="flex gap-6 items-center">
-            <a href="/search" className="hover:underline">Ver Artistas</a>
-            <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
-              Cadastrar Artista
-            </a>
-            <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
-              Login de Artista
-            </a>
-          </nav>
         </header>
         <div className="flex-1 flex items-center justify-center bg-gray-50">
           <div className="text-center">
@@ -128,17 +121,82 @@ export default function Dashboard() {
 
   return (
     <div className="flex flex-col w-full min-h-screen">
-      <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-3 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Nós Cultural</h1>
-        <nav className="hidden md:flex gap-6 items-center">
-          <a href="/search" className="hover:underline">Ver Artistas</a>
-          <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
-            Cadastrar Artista
-          </a>
-          <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
-            Login de Artista
-          </a>
-        </nav>
+      {/* Header */}
+      <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-3">
+        <div className="flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Nós Cultural</h1>
+          
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex gap-6 items-center">
+            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
+              Cadastrar Artista
+            </a>
+            <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition">
+              Login de Artista
+            </a>
+            
+            {/* Profile Icon - Desktop */}
+            <div className="relative">
+              <button 
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="w-10 h-10 rounded-full bg-white text-[#1e3a8a] flex items-center justify-center font-bold hover:bg-gray-200 transition"
+              >
+                A
+              </button>
+              
+              {profileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-2 z-50">
+                  <a href="/artist/profile" className="block px-4 py-2 hover:bg-gray-100">
+                    Meu Perfil
+                  </a>
+                  <a href="/artist/edit" className="block px-4 py-2 hover:bg-gray-100">
+                    Editar Perfil
+                  </a>
+                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600">
+                    Excluir Conta
+                  </button>
+                  <hr className="my-2" />
+                  <button className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                    Sair
+                  </button>
+                </div>
+              )}
+            </div>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="md:hidden text-white"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {mobileMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden mt-4 flex flex-col gap-3 pb-4">
+            <a href="/search" className="hover:underline py-2">Ver Artistas</a>
+            <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition text-center">
+              Cadastrar Artista
+            </a>
+            <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition text-center">
+              Login de Artista
+            </a>
+            <hr className="border-white/30" />
+            <a href="/artist/profile" className="hover:underline py-2">Meu Perfil</a>
+            <a href="/artist/edit" className="hover:underline py-2">Editar Perfil</a>
+            <button className="text-left hover:underline py-2 text-red-300">Excluir Conta</button>
+            <button className="text-left hover:underline py-2">Sair</button>
+          </nav>
+        )}
       </header>
 
       <main className="flex-1 bg-gray-50 py-8 lg:py-12">
@@ -292,9 +350,6 @@ export default function Dashboard() {
 
       <footer className="bg-[#1e3a8a] text-white text-center p-4">
         <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
-        <p className="mt-2">
-          <a href="/equipmentRegistration" className="hover:underline">Cadastrar Equipamento</a>
-        </p>
       </footer>
     </div>
   );
