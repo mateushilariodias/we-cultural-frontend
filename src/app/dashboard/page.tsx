@@ -138,11 +138,19 @@ export default function Dashboard() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-6 items-center">
             <a href="/search" className="hover:underline">Ver Artistas</a>
-            <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
-              Cadastrar Artista
-            </a>
             
-            {artist ? (
+            {!artist && (
+              <>
+                <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
+                  Cadastrar Artista
+                </a>
+                <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition">
+                  Login de Artista
+                </a>
+              </>
+            )}
+            
+            {artist && (
               /* Profile Icon - Desktop */
               <div className="relative">
                 <button 
@@ -177,10 +185,6 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-            ) : (
-              <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition">
-                Login de Artista
-              </a>
             )}
           </nav>
 
@@ -223,20 +227,24 @@ export default function Dashboard() {
             )}
             
             <a href="/search" className="hover:underline py-2">Ver Artistas</a>
-            <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition text-center">
-              Cadastrar Artista
-            </a>
             
-            {artist ? (
+            {!artist && (
+              <>
+                <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition text-center">
+                  Cadastrar Artista
+                </a>
+                <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition text-center">
+                  Login de Artista
+                </a>
+              </>
+            )}
+            
+            {artist && (
               <>
                 <hr className="border-white/30" />
                 <a href="/artist/settings" className="hover:underline py-2">⚙️ Configurações</a>
                 <button onClick={handleLogout} className="text-left hover:underline py-2">🚪 Sair</button>
               </>
-            ) : (
-              <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition text-center">
-                Login de Artista
-              </a>
             )}
           </nav>
         )}
