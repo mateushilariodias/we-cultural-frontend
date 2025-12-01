@@ -1,5 +1,5 @@
 // src/config/api.ts
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://we-cultural-backend-production.up.railway.app';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://we-cultural-backend.onrender.com';
 
 export const API_ENDPOINTS = {
   // Auth
