@@ -1,17 +1,22 @@
-'use client';
+"use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { 
   PieChart, Pie, Cell, Tooltip, Legend, 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer 
 } from "recharts";
-import { API_ENDPOINTS } from "@/config/api";
-import { useAuth } from "@/contexts/AuthContext";
 
 const COLORS = {
   primary: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'],
   diversity: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444']
 };
+
+interface Artist {
+  id: string;
+  name: string;
+  email: string;
+  profilePicture?: string;
+}
 
 interface Totais {
   totalArtistas: number;
@@ -21,7 +26,7 @@ interface Totais {
 
 interface ArtistaPorGenero {
   genero: string;
-  _count: { genero: number; };
+  _count: { genero: number };
 }
 
 interface ArtistaDiversidade {
@@ -46,29 +51,55 @@ interface Stats {
 
 export default function Dashboard() {
   const router = useRouter();
-  const { artist, logout } = useAuth();
+  const [artist, setArtist] = useState<Artist | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
+  // Carregar artista do localStorage
   useEffect(() => {
-    fetch(API_ENDPOINTS.stats)
-      .then((res) => res.json())
-      .then((data: Stats) => {
+    const artistData = localStorage.getItem("artistData");
+    if (artistData) {
+      try {
+        const parsed = JSON.parse(artistData);
+        setArtist(parsed);
+        console.log("✅ Artista carregado:", parsed);
+      } catch (error) {
+        console.error("❌ Erro ao parsear artistData:", error);
+      }
+    } else {
+      console.log("⚠️ Nenhum artista logado");
+    }
+  }, []);
+
+  // Carregar estatísticas
+  useEffect(() => {
+    const loadStats = async () => {
+      try {
+        const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+        const res = await fetch(`${BACKEND_URL}/api/stats`);
+        
+        if (!res.ok) throw new Error('Erro ao carregar estatísticas');
+        
+        const data = await res.json();
         setStats(data);
         setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Erro ao carregar stats:", err);
         setError("Erro ao carregar estatísticas");
         setLoading(false);
-      });
+      }
+    };
+
+    loadStats();
   }, []);
 
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("artistData");
+    setArtist(null);
     router.push("/");
   };
 
@@ -133,13 +164,13 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-3">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Nós Cultural</h1>
+          <a href="/" className="text-2xl font-bold hover:opacity-90 transition">Nós Cultural</a>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-6 items-center">
             <a href="/search" className="hover:underline">Ver Artistas</a>
             
-            {!artist && (
+            {!artist ? (
               <>
                 <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
                   Cadastrar Artista
@@ -148,14 +179,13 @@ export default function Dashboard() {
                   Login de Artista
                 </a>
               </>
-            )}
-            
-            {artist && (
+            ) : (
               /* Profile Icon - Desktop */
               <div className="relative">
                 <button 
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                   className="w-10 h-10 rounded-full border-2 border-white hover:border-[#F59E0B] transition overflow-hidden"
+                  title={artist.name}
                 >
                   {artist.profilePicture ? (
                     <img 
@@ -176,10 +206,16 @@ export default function Dashboard() {
                       <p className="font-semibold text-gray-900">{artist.name}</p>
                       <p className="text-sm text-gray-500 truncate">{artist.email}</p>
                     </div>
-                    <a href="/artist/settings" className="block px-4 py-2 hover:bg-gray-100">
+                    <a 
+                      href={`/dashboard/${artist.id}/settings`}
+                      className="block px-4 py-2 hover:bg-gray-100 transition"
+                    >
                       ⚙️ Configurações
                     </a>
-                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 hover:bg-gray-100">
+                    <button 
+                      onClick={handleLogout} 
+                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 transition"
+                    >
                       🚪 Sair
                     </button>
                   </div>
@@ -228,7 +264,7 @@ export default function Dashboard() {
             
             <a href="/search" className="hover:underline py-2">Ver Artistas</a>
             
-            {!artist && (
+            {!artist ? (
               <>
                 <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition text-center">
                   Cadastrar Artista
@@ -237,12 +273,10 @@ export default function Dashboard() {
                   Login de Artista
                 </a>
               </>
-            )}
-            
-            {artist && (
+            ) : (
               <>
                 <hr className="border-white/30" />
-                <a href="/artist/settings" className="hover:underline py-2">⚙️ Configurações</a>
+                <a href={`/dashboard/${artist.id}/settings`} className="hover:underline py-2">⚙️ Configurações</a>
                 <button onClick={handleLogout} className="text-left hover:underline py-2">🚪 Sair</button>
               </>
             )}

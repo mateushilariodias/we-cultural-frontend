@@ -84,7 +84,6 @@ export default function SearchPage() {
             Nós Cultural
           </a>
           <nav className="flex gap-4">
-            <a href="/dashboard" className="hover:underline">Dashboard</a>
             <a href="/artistLogin" className="hover:underline">Login</a>
           </nav>
         </div>

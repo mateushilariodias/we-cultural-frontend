@@ -1,30 +1,90 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/contexts/AuthContext";
-import { API_ENDPOINTS } from "@/config/api";
+
+interface Artist {
+  _id: string;
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  birthDate?: string;
+  gender: string;
+  profilePicture?: string;
+  categories?: string[];
+  lgbtqiapn?: boolean;
+  black?: boolean;
+  indigenous?: boolean;
+  pcd?: boolean;
+  portfolioLink?: string;
+  resumeLink?: string;
+  socialLink?: string;
+}
 
 export default function ArtistSettings() {
   const router = useRouter();
-  const { artist, logout, refreshArtist } = useAuth();
+  const [artist, setArtist] = useState<Artist | null>(null);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'profile' | 'edit' | 'delete'>('profile');
-  const [loading, setLoading] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
-  if (!artist) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
-          <p className="text-gray-600 mb-6">Você precisa estar logado para acessar esta página.</p>
-          <a href="/artistLogin" className="bg-[#1e3a8a] text-white px-6 py-3 rounded hover:bg-[#15306e] transition">
-            Fazer Login
-          </a>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // Carregar dados do artista do localStorage
+    const artistData = localStorage.getItem("artistData");
+    
+    if (!artistData) {
+      // Não está logado, redirecionar para login
+      router.push("/artistLogin");
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(artistData);
+      
+      // Buscar dados completos do backend
+      loadFullArtistData(parsed.id || parsed._id);
+    } catch (error) {
+      console.error("Erro ao carregar artista:", error);
+      router.push("/artistLogin");
+    }
+  }, [router]);
+
+  const loadFullArtistData = async (artistId: string) => {
+    try {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = localStorage.getItem("authToken");
+
+      const res = await fetch(`${BACKEND_URL}/api/artists/${artistId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok) {
+        throw new Error('Erro ao carregar dados');
+      }
+
+      const data = await res.json();
+      setArtist(data);
+      setLoading(false);
+    } catch (error) {
+      console.error("Erro ao carregar dados completos:", error);
+      // Se falhar, usar dados do localStorage
+      const cachedData = localStorage.getItem("artistData");
+      if (cachedData) {
+        setArtist(JSON.parse(cachedData));
+      }
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("artistData");
+    router.push("/");
+  };
 
   const handleDelete = async () => {
     if (!showDeleteConfirm) {
@@ -32,10 +92,15 @@ export default function ArtistSettings() {
       return;
     }
 
-    setLoading(true);
+    if (!artist) return;
+
+    setDeleteLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(API_ENDPOINTS.artistById(artist._id), {
+      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const token = localStorage.getItem("authToken");
+      const artistId = artist._id || artist.id;
+
+      const res = await fetch(`${BACKEND_URL}/api/artists/${artistId}`, {
         method: "DELETE",
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -43,20 +108,47 @@ export default function ArtistSettings() {
       });
 
       if (res.ok) {
-        alert("Conta excluída com sucesso!");
-        logout();
+        alert("✅ Conta excluída com sucesso! Seus dados foram removidos da plataforma.");
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("artistData");
         router.push("/");
       } else {
-        alert("Erro ao excluir conta. Tente novamente.");
+        const data = await res.json();
+        alert(data.message || "Erro ao excluir conta. Tente novamente.");
       }
     } catch (error) {
       console.error(error);
       alert("Erro ao conectar com o servidor.");
     } finally {
-      setLoading(false);
+      setDeleteLoading(false);
       setShowDeleteConfirm(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e3a8a] mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando seus dados...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!artist) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Acesso Restrito</h2>
+          <p className="text-gray-600 mb-6">Você precisa estar logado para acessar esta página.</p>
+          <a href="/artistLogin" className="bg-[#1e3a8a] text-white px-6 py-3 rounded hover:bg-[#15306e] transition inline-block">
+            Fazer Login
+          </a>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -153,11 +245,15 @@ export default function ArtistSettings() {
                     <div className="md:col-span-2">
                       <label className="text-sm font-semibold text-gray-700">Categorias</label>
                       <div className="flex gap-2 flex-wrap mt-2">
-                        {artist.categories?.map((cat) => (
-                          <span key={cat} className="bg-[#1e3a8a] text-white px-3 py-1 rounded-full text-sm">
-                            {cat}
-                          </span>
-                        ))}
+                        {artist.categories && artist.categories.length > 0 ? (
+                          artist.categories.map((cat) => (
+                            <span key={cat} className="bg-[#1e3a8a] text-white px-3 py-1 rounded-full text-sm">
+                              {cat}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="text-gray-500 text-sm">Nenhuma categoria</span>
+                        )}
                       </div>
                     </div>
 
@@ -207,12 +303,27 @@ export default function ArtistSettings() {
               {activeTab === 'edit' && (
                 <div>
                   <h2 className="text-2xl font-bold text-[#1e3a8a] mb-6">Editar Perfil</h2>
+                  <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                    <p className="text-blue-700">
+                      🚧 <strong>Funcionalidade em desenvolvimento</strong>
+                    </p>
+                    <p className="text-blue-600 text-sm mt-2">
+                      Em breve você poderá editar suas informações diretamente por aqui. 
+                    </p>
+                  </div>
                   <p className="text-gray-600 mb-4">
-                    Esta funcionalidade estará disponível em breve. Por enquanto, entre em contato com o suporte para fazer alterações.
+                    Por enquanto, entre em contato conosco para fazer alterações no seu perfil:
                   </p>
-                  <button className="bg-[#1e3a8a] text-white px-6 py-3 rounded hover:bg-[#15306e] transition">
-                    Contatar Suporte
-                  </button>
+                  <div className="space-y-2 mb-6">
+                    <p className="text-gray-700">📧 <strong>E-mail:</strong> gabriel.ssmc@outlook.com</p>
+                    <p className="text-gray-700">📱 <strong>Telefone:</strong> (16) 99119-0429</p>
+                  </div>
+                  <a 
+                    href="mailto:gabriel.ssmc@outlook.com?subject=Solicitação de alteração de perfil - Nós Cultural"
+                    className="inline-block bg-[#1e3a8a] text-white px-6 py-3 rounded hover:bg-[#15306e] transition"
+                  >
+                    Enviar E-mail de Suporte
+                  </a>
                 </div>
               )}
 
@@ -226,21 +337,22 @@ export default function ArtistSettings() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                       </svg>
                       <div>
-                        <h3 className="text-red-800 font-semibold mb-2">Atenção!</h3>
+                        <h3 className="text-red-800 font-semibold mb-2">⚠️ Atenção!</h3>
                         <p className="text-red-700 text-sm">
-                          Esta ação é <strong>irreversível</strong>. Todos os seus dados serão permanentemente excluídos de nossa plataforma.
+                          Esta ação é <strong>irreversível</strong>. Todos os seus dados serão permanentemente excluídos de nossa plataforma conforme seus direitos LGPD.
                         </p>
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-4 mb-6">
-                    <p className="text-gray-700">Ao excluir sua conta, você perderá:</p>
+                    <p className="text-gray-700 font-semibold">Ao excluir sua conta, você perderá:</p>
                     <ul className="list-disc list-inside space-y-2 text-gray-600">
-                      <li>Seu perfil e informações pessoais</li>
-                      <li>Suas categorias e marcadores sociais</li>
-                      <li>Links do portfólio e currículo</li>
-                      <li>Acesso à plataforma</li>
+                      <li>Seu perfil público e informações pessoais</li>
+                      <li>Suas categorias artísticas e marcadores sociais</li>
+                      <li>Links do portfólio, currículo e redes sociais</li>
+                      <li>Acesso à plataforma Nós Cultural</li>
+                      <li>Visibilidade para produtores e público</li>
                     </ul>
                   </div>
 
@@ -253,14 +365,15 @@ export default function ArtistSettings() {
                     </button>
                   ) : (
                     <div className="space-y-4">
-                      <p className="font-semibold text-gray-900">Tem certeza absoluta?</p>
+                      <p className="font-semibold text-gray-900 text-lg">Tem certeza absoluta?</p>
+                      <p className="text-gray-600">Digite <strong>EXCLUIR</strong> para confirmar:</p>
                       <div className="flex gap-4">
                         <button
                           onClick={handleDelete}
-                          disabled={loading}
+                          disabled={deleteLoading}
                           className="bg-red-600 text-white px-6 py-3 rounded hover:bg-red-700 transition font-semibold disabled:opacity-50"
                         >
-                          {loading ? "Excluindo..." : "Sim, Excluir Permanentemente"}
+                          {deleteLoading ? "Excluindo..." : "Sim, Excluir Permanentemente"}
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(false)}
