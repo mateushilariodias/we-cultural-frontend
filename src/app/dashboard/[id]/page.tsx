@@ -169,7 +169,7 @@ export default function Dashboard() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-6 items-center">
             <a href="/search" className="hover:underline">Ver Artistas</a>
-            
+
             {!artist ? (
               <>
                 <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
@@ -211,6 +211,12 @@ export default function Dashboard() {
                       className="block px-4 py-2 hover:bg-gray-100 transition"
                     >
                       ⚙️ Configurações
+                    </a>
+                   <a 
+                      href={`/dashboard/${artist.id}/collectiveRegistration`}
+                      className="block px-4 py-2 hover:bg-gray-100 transition"
+                      >
+                      📝 Cadastar Coletivo
                     </a>
                     <button 
                       onClick={handleLogout} 
