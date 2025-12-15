@@ -17,27 +17,19 @@ export default function CollectiveLogin() {
     try {
       const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
-      // Buscar todos os coletivos
-      const res = await fetch(`${BACKEND_URL}/api/collectives`);
-      const collectives = await res.json();
+      // Chamar endpoint de login do backend
+      const res = await fetch(`${BACKEND_URL}/api/auth/collective/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, password }),
+      });
 
-      // Encontrar coletivo por nome
-      const collective = collectives.find((c: any) => 
-        c.name.toLowerCase() === name.toLowerCase()
-      );
+      const data = await res.json();
 
-      if (!collective) {
-        setError("Coletivo não encontrado");
-        setLoading(false);
-        return;
-      }
-
-      // Validar senha
-      const bcrypt = await import('bcryptjs');
-      const isValid = await bcrypt.compare(password, collective.password);
-
-      if (!isValid) {
-        setError("Senha incorreta");
+      if (!res.ok) {
+        setError(data.message || "Erro no login");
         setLoading(false);
         return;
       }
@@ -45,13 +37,13 @@ export default function CollectiveLogin() {
       // Salvar dados do coletivo
       localStorage.setItem("collectiveToken", "collective_logged_in");
       localStorage.setItem("collectiveData", JSON.stringify({
-        id: collective._id,
-        name: collective.name,
-        profilePicture: collective.profilePicture,
+        id: data.collective.id,
+        name: data.collective.name,
+        profilePicture: data.collective.profilePicture,
       }));
 
       // Redirecionar para dashboard do coletivo
-      router.push(`/collective/${collective._id}`);
+      router.push(`/collective/${data.collective.id}`);
 
     } catch (err) {
       console.error("Erro no login:", err);
