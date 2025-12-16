@@ -275,8 +275,8 @@ export default function SearchPage() {
       <footer className="bg-[#1e3a8a] text-white text-center p-6 mt-20">
         <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
         <div className="flex justify-center gap-6 mt-4 text-sm">
-          <a href="/politica-privacidade" className="hover:underline">Política de Privacidade</a>
-          <a href="/termos-de-uso" className="hover:underline">Termos de Uso</a>
+          <a href="/privacy" className="hover:underline">Política de Privacidade</a>
+          <a href="/terms" className="hover:underline">Termos de Uso</a>
         </div>
       </footer>
     </div>
