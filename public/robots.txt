@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://we-cultural-frontend.vercel.app
+
+# Sitemaps
+Sitemap: https://we-cultural-frontend.vercel.app/sitemap.xml

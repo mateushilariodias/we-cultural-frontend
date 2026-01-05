@@ -9,7 +9,6 @@ export default function Home() {
     <div className="flex flex-col w-full min-h-screen">
       <Header />
       <Hero />
-      <MaintenanceBanner />
       <Footer />
     </div>
   );
