@@ -14,16 +14,22 @@ export default function EquipmentLogin() {
     setLoading(true);
     setError("");
 
+    // Validação básica
+    if (!name.trim() || !password.trim()) {
+      setError("Nome e senha são obrigatórios");
+      setLoading(false);
+      return;
+    }
+
     try {
       const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       
-      // Chamar endpoint de login do backend
       const res = await fetch(`${BACKEND_URL}/api/auth/equipment/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ name, password }),
+        body: JSON.stringify({ name: name.trim(), password }),
       });
 
       const data = await res.json();
@@ -34,15 +40,16 @@ export default function EquipmentLogin() {
         return;
       }
 
-      // Salvar dados do equipamento
-      localStorage.setItem("equipmentToken", data.token || "equipment_logged_in");
-      localStorage.setItem("equipmentData", JSON.stringify({
-        id: data.equipment.id,
-        name: data.equipment.name,
-        logo: data.equipment.logo,
-      }));
+      // ✅ Usar sessionStorage com verificação de window
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem("equipmentToken", data.token);
+        sessionStorage.setItem("equipmentData", JSON.stringify({
+          id: data.equipment.id,
+          name: data.equipment.name,
+          logo: data.equipment.logo,
+        }));
+      }
 
-      // Redirecionar para perfil do equipamento
       router.push(`/equipment/${data.equipment.id}`);
 
     } catch (err) {
@@ -55,7 +62,6 @@ export default function EquipmentLogin() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Header */}
       <header className="bg-purple-700 text-white px-4 lg:px-40 py-3">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
@@ -66,7 +72,6 @@ export default function EquipmentLogin() {
         </div>
       </header>
 
-      {/* Main Content */}
       <div className="flex-1 flex items-center justify-center bg-gray-50 py-12">
         <section className="max-w-md w-full bg-white shadow-lg rounded-lg p-8 mx-4">
           <div className="text-center mb-6">
@@ -110,7 +115,7 @@ export default function EquipmentLogin() {
                 disabled={loading}
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
-                    handleSubmit(e);
+                    handleSubmit(e as any);
                   }
                 }}
               />
@@ -152,7 +157,6 @@ export default function EquipmentLogin() {
         </section>
       </div>
 
-      {/* Footer */}
       <footer className="bg-purple-700 text-white text-center p-4">
         <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
       </footer>
