@@ -38,11 +38,16 @@ interface FormData {
   acceptTerms: boolean;
 }
 
+interface FormErrors {
+  [key: string]: string;
+}
+
 export default function Cadastro() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [errors, setErrors] = useState<FormErrors>({});
 
   // Estado para armazenar os dados do formulário
   const [formData, setFormData] = useState<FormData>({
@@ -66,15 +71,115 @@ export default function Cadastro() {
 
   const [showTermsModal, setShowTermsModal] = useState(false);
 
+  // ===== MÁSCARA DE TELEFONE =====
+  const maskPhone = (value: string) => {
+    if (!value) return "";
+    value = value.replace(/\D/g, ""); // Remove tudo que não é número
+    value = value.replace(/^(\d{2})(\d)/g, "($1) $2"); // DDD
+    value = value.replace(/(\d)(\d{4})$/, "$1-$2"); // Hífen final
+    return value;
+  };
+
+  // ===== VALIDAÇÕES =====
+  
+  // Validar email
+  const isValidEmail = (email: string): boolean => {
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(email);
+  };
+
+  // Validar telefone brasileiro (ajustado para aceitar a máscara)
+  const isValidPhone = (phone: string): boolean => {
+    const regex = /^\(\d{2}\)\s\d{4,5}-\d{4}$/;
+    return regex.test(phone);
+  };
+
+  // Validar senha: min 8 caracteres, letra maiúscula, minúscula, número e caractere especial
+  const isValidPassword = (password: string): boolean => {
+    const minLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    return minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+  };
+
+  // Validar força da senha (retorna mensagem)
+  const getPasswordStrengthMessage = (password: string): string => {
+    if (!password) return "";
+    if (password.length < 8) return "❌ Mínimo 8 caracteres";
+    if (!/[A-Z]/.test(password)) return "❌ Precisa de letra maiúscula";
+    if (!/[a-z]/.test(password)) return "❌ Precisa de letra minúscula";
+    if (!/[0-9]/.test(password)) return "❌ Precisa de número";
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return "❌ Precisa de caractere especial: !@#$%^&*()_+-=[]{}';:\"\\|,.<>/?";
+    return "✅ Senha forte";
+  };
+
+  // Validar URL
+  const isValidURL = (url: string): boolean => {
+    if (!url) return true; // URL não obrigatória se campo vazio
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Validar imagem
+  const isValidImage = (file: File): boolean => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    return validTypes.includes(file.type) && file.size <= maxSize;
+  };
+
+  // Validar idade (mínimo 16 anos)
+  const isValidAge = (birthDate: string): boolean => {
+    const birth = new Date(birthDate);
+    const today = new Date();
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age >= 16;
+  };
+
   // Atualizar campo individual
   const updateField = (field: keyof FormData, value: any) => {
+    // Aplicar máscara se for o campo de telefone
+    if (field === 'phone') {
+      value = maskPhone(value);
+    }
+
     setFormData(prev => ({ ...prev, [field]: value }));
+    // Limpar erro do campo ao editar
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   // Handle da imagem com preview
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Validar imagem
+      if (!isValidImage(file)) {
+        setErrors(prev => ({
+          ...prev,
+          profilePicture: "Imagem inválida. Use JPG, PNG ou WebP (máx 5MB)"
+        }));
+        return;
+      }
+
       updateField('profilePicture', file);
       
       // Criar preview
@@ -98,34 +203,67 @@ export default function Cadastro() {
 
   // Validação antes de avançar
   const validateStep = (step: number): boolean => {
+    const newErrors: FormErrors = {};
+
     if (step === 1) {
-      if (!formData.name || !formData.birthDate || !formData.email || 
-          !formData.phone || !formData.password || !formData.profilePicture) {
-        alert("Por favor, preencha todos os campos obrigatórios da Etapa 1");
-        return false;
+      if (!formData.name.trim()) {
+        newErrors.name = "Nome completo é obrigatório";
+      }
+      if (!formData.birthDate) {
+        newErrors.birthDate = "Data de nascimento é obrigatória";
+      } else if (!isValidAge(formData.birthDate)) {
+        newErrors.birthDate = "Você deve ter no mínimo 16 anos";
+      }
+      if (!formData.email.trim()) {
+        newErrors.email = "E-mail é obrigatório";
+      } else if (!isValidEmail(formData.email)) {
+        newErrors.email = "E-mail inválido (ex: seu@email.com)";
+      }
+      if (!formData.phone.trim()) {
+        newErrors.phone = "Telefone é obrigatório";
+      } else if (!isValidPhone(formData.phone)) {
+        newErrors.phone = "Formato inválido. Use: (00) 00000-0000";
+      }
+      if (!formData.password) {
+        newErrors.password = "Senha é obrigatória";
+      } else if (!isValidPassword(formData.password)) {
+        newErrors.password = "Senha não atende aos requisitos";
+      }
+      if (!formData.profilePicture) {
+        newErrors.profilePicture = "Foto de perfil é obrigatória";
       }
     }
+
     if (step === 2) {
       if (!formData.gender) {
-        alert("Por favor, selecione sua identidade de gênero");
-        return false;
+        newErrors.gender = "Selecione sua identidade de gênero";
       }
     }
+
     if (step === 3) {
       if (formData.categories.length === 0) {
-        alert("Por favor, selecione pelo menos uma categoria artística");
-        return false;
+        newErrors.categories = "Selecione pelo menos uma categoria";
       }
-      if (!formData.portfolioLink || !formData.resumeLink) {
-        alert("Por favor, preencha os links do portfólio e currículo");
-        return false;
+      if (!formData.portfolioLink.trim()) {
+        newErrors.portfolioLink = "Link do portfólio é obrigatório";
+      } else if (!isValidURL(formData.portfolioLink)) {
+        newErrors.portfolioLink = "URL inválida (ex: https://seu-site.com)";
+      }
+      if (!formData.resumeLink.trim()) {
+        newErrors.resumeLink = "Link do currículo é obrigatório";
+      } else if (!isValidURL(formData.resumeLink)) {
+        newErrors.resumeLink = "URL inválida (ex: https://seu-site.com)";
+      }
+      if (formData.socialLink && !isValidURL(formData.socialLink)) {
+        newErrors.socialLink = "URL inválida (ex: https://instagram.com/seu-perfil)";
       }
       if (!formData.acceptTerms) {
-        alert("Você precisa aceitar o Termo de Consentimento LGPD para prosseguir");
-        return false;
+        newErrors.acceptTerms = "Você deve aceitar o Termo de Consentimento LGPD";
       }
     }
-    return true;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleNext = () => {
@@ -260,10 +398,14 @@ export default function Cadastro() {
                     accept="image/*"
                     onChange={handleImageChange}
                     className="hidden"
+                    required
                   />
                 </label>
                 {imagePreview && (
                   <p className="text-sm text-green-600 font-medium">✓ Foto carregada</p>
+                )}
+                {errors.profilePicture && (
+                  <p className="text-sm text-red-600 font-medium">{errors.profilePicture}</p>
                 )}
               </div>
 
@@ -273,20 +415,22 @@ export default function Cadastro() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => updateField('name', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />
+                {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
               </div>
 
               <div>
-                <label className="block font-semibold text-gray-700 mb-2">Data de Nascimento *</label>
+                <label className="block font-semibold text-gray-700 mb-2">Data de Nascimento * (Mínimo 16 anos)</label>
                 <input
                   type="date"
                   value={formData.birthDate}
                   onChange={(e) => updateField('birthDate', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.birthDate ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />
+                {errors.birthDate && <p className="text-red-600 text-sm mt-1">{errors.birthDate}</p>}
               </div>
 
               <div>
@@ -295,9 +439,11 @@ export default function Cadastro() {
                   type="email"
                   value={formData.email}
                   onChange={(e) => updateField('email', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  placeholder="seu@email.com"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />
+                {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
               </div>
 
               <div>
@@ -307,9 +453,11 @@ export default function Cadastro() {
                   value={formData.phone}
                   onChange={(e) => updateField('phone', e.target.value)}
                   placeholder="(00) 00000-0000"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  maxLength={15}
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />
+                {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
               </div>
 
               <div>
@@ -318,9 +466,21 @@ export default function Cadastro() {
                   type="password"
                   value={formData.password}
                   onChange={(e) => updateField('password', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  placeholder="Min 8 caracteres: maiúscula, minúscula, número e caractere especial"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />
+                {formData.password && (
+                  <p className={`text-sm mt-2 font-medium ${
+                    isValidPassword(formData.password) ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {getPasswordStrengthMessage(formData.password)}
+                  </p>
+                )}
+                {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
+                <p className="text-xs text-gray-500 mt-2">
+                  Requisitos: Min 8 caracteres, Maiúscula (A-Z), Minúscula (a-z), Número (0-9), Caractere especial (!@#$%...)
+                </p>
               </div>
 
               <button
@@ -343,7 +503,7 @@ export default function Cadastro() {
                 <select 
                   value={formData.gender}
                   onChange={(e) => updateField('gender', e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]" 
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.gender ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 >
                   <option value="">Selecione...</option>
@@ -353,6 +513,7 @@ export default function Cadastro() {
                   <option value="Mulher Trans">Mulher Trans</option>
                   <option value="Não-binário">Não-binário</option>
                 </select>
+                {errors.gender && <p className="text-red-600 text-sm mt-1">{errors.gender}</p>}
               </div>
 
               <div className="bg-gray-50 p-6 rounded-lg">
@@ -423,11 +584,11 @@ export default function Cadastro() {
 
               <div className="bg-gray-50 p-6 rounded-lg">
                 <p className="font-semibold text-gray-700 mb-4">
-                  Categorias Artísticas * 
-                  {formData.categories.length > 0 && (
+                  Categorias Artísticas * {formData.categories.length > 0 && (
                     <span className="text-[#F59E0B] ml-2">({formData.categories.length} selecionadas)</span>
                   )}
                 </p>
+                {errors.categories && <p className="text-red-600 text-sm mb-3">{errors.categories}</p>}
                 <div className="grid grid-cols-2 gap-3">
                   {categorias.map((cat) => (
                     <label key={cat} className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded transition">
@@ -450,9 +611,10 @@ export default function Cadastro() {
                   value={formData.portfolioLink}
                   onChange={(e) => updateField('portfolioLink', e.target.value)}
                   placeholder="https://seu-portfolio.com"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.portfolioLink ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />
+                {errors.portfolioLink && <p className="text-red-600 text-sm mt-1">{errors.portfolioLink}</p>}
               </div>
 
               <div>
@@ -462,9 +624,10 @@ export default function Cadastro() {
                   value={formData.resumeLink}
                   onChange={(e) => updateField('resumeLink', e.target.value)}
                   placeholder="https://seu-curriculo.com"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.resumeLink ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />
+                {errors.resumeLink && <p className="text-red-600 text-sm mt-1">{errors.resumeLink}</p>}
               </div>
 
               <div>
@@ -474,8 +637,9 @@ export default function Cadastro() {
                   value={formData.socialLink}
                   onChange={(e) => updateField('socialLink', e.target.value)}
                   placeholder="https://instagram.com/seu-perfil"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.socialLink ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {errors.socialLink && <p className="text-red-600 text-sm mt-1">{errors.socialLink}</p>}
               </div>
 
               {/* TERMO LGPD */}
@@ -510,6 +674,7 @@ export default function Cadastro() {
                     <strong>Li e aceito</strong> o Termo de Consentimento e Política de Privacidade, estando ciente que meus dados serão públicos conforme descrito.
                   </span>
                 </label>
+                {errors.acceptTerms && <p className="text-red-600 text-sm mt-3">{errors.acceptTerms}</p>}
               </div>
 
               <div className="flex gap-4">
@@ -624,7 +789,7 @@ export default function Cadastro() {
                 <li>✓ Ter lido e compreendido este termo</li>
                 <li>✓ Consentir livre e expressamente com a coleta e tratamento dos dados</li>
                 <li>✓ Estar ciente que seus dados serão <strong>públicos</strong></li>
-                <li>✓ Ter mais de 18 anos ou autorização de responsável legal</li>
+                <li>✓ Ter mais de 16 anos ou autorização de responsável legal</li>
               </ul>
               
               <h3 className="text-lg font-bold text-[#1e3a8a] mt-6">10. Contato - Encarregado de Dados</h3>
