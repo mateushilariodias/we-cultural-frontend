@@ -28,13 +28,13 @@ export default function MaintenanceBanner() {
             </h3>
 
             <p className="text-xs sm:text-sm text-gray-600">
-              <strong>Período:</strong> 18/12/2024 até 04/01/2025
+              <strong>Período:</strong> 18/12/2025 até 04/01/2026
             </p>
 
             <p className="text-xs sm:text-sm leading-relaxed text-gray-700">
               A plataforma <strong>Nós Cultural</strong> está em fase de desenvolvimento.
               Algumas funcionalidades serão implementadas a partir de{" "}
-              <strong>05 de janeiro de 2025</strong>.
+              <strong>05 de janeiro de 2026</strong>.
             </p>
 
             {/* Status */}

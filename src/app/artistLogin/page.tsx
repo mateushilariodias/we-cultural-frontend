@@ -142,7 +142,7 @@ export default function Login() {
 
       {/* Footer */}
       <footer className="bg-[#1e3a8a] text-white text-center p-4">
-        <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
+        <p>© 2026 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
       </footer>
     </div>
   );

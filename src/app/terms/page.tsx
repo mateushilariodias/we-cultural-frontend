@@ -199,7 +199,7 @@ export default function TermsOfUse() {
       {/* Footer */}
       <footer className="bg-[#1e3a8a] text-white text-center p-6">
         <div className="max-w-4xl mx-auto">
-          <p className="mb-2">© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
+          <p className="mb-2">© 2026 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
           <div className="flex justify-center gap-4 text-sm">
             <a href="/privacy" className="hover:underline">Política de Privacidade</a>
             <span>•</span>

@@ -158,7 +158,7 @@ export default function EquipmentLogin() {
       </div>
 
       <footer className="bg-purple-700 text-white text-center p-4">
-        <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
+        <p>© 2026 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
       </footer>
     </div>
   );
