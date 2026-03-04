@@ -11,7 +11,7 @@ import Blog from "@/components/Blog";
 
 export default function Home() {
   return (
-    <div className="flex flex-col w-full min-h-screen">
+    <div className="relative flex flex-col w-full min-h-screen">
       <Header />
       <Hero />
       <About />

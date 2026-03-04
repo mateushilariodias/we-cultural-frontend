@@ -21,12 +21,17 @@ interface FormData {
   profilePicture: File | null;
 }
 
+interface FormErrors {
+  [key: string]: string;
+}
+
 export default function CollectiveRegistration() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -40,6 +45,75 @@ export default function CollectiveRegistration() {
     confirmPassword: "",
     profilePicture: null,
   });
+
+  // ===== VALIDAÇÕES E MÁSCARAS =====
+
+  // Máscara e validação telefone
+  const formatPhone = (value: string): string => {
+    const numbers = value.replace(/\D/g, '');
+    if (numbers.length <= 11) {
+      return numbers
+        .replace(/^(\d{2})(\d)/, '($1) $2')
+        .replace(/(\d{4,5})(\d{4})$/, '$1-$2');
+    }
+    return value;
+  };
+
+  const isValidPhone = (phone: string): boolean => {
+    const numbers = phone.replace(/\D/g, '');
+    return numbers.length === 10 || numbers.length === 11;
+  };
+
+  // Validação URL
+  const isValidURL = (url: string): boolean => {
+    if (!url) return false;
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  // Validação imagem
+  const isValidImage = (file: File): boolean => {
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const maxSize = 5 * 1024 * 1024;
+    return validTypes.includes(file.type) && file.size <= maxSize;
+  };
+
+  // Validação senha
+  const isValidPassword = (password: string): boolean => {
+    const minLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+    
+    return minLength && hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar;
+  };
+
+  const getPasswordStrengthMessage = (password: string): string => {
+    if (!password) return "";
+    if (password.length < 8) return "❌ Mínimo 8 caracteres";
+    if (!/[A-Z]/.test(password)) return "❌ Precisa de letra maiúscula";
+    if (!/[a-z]/.test(password)) return "❌ Precisa de letra minúscula";
+    if (!/[0-9]/.test(password)) return "❌ Precisa de número";
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) return "❌ Precisa de caractere especial (!@#$%...)";
+    return "✅ Senha forte";
+  };
+
+  // Validar nomes de membros
+  const validateMemberNames = (names: string): boolean => {
+    if (!names) return true; // Campo opcional
+    // Verificar se há apenas letras, números, espaços, hífens e vírgulas
+    return /^[a-zA-Z0-9\s\-,áéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ]*$/.test(names);
+  };
+
+  // Validar nome do coletivo
+  const isValidCollectiveName = (name: string): boolean => {
+    return name.length >= 3 && /^[a-zA-Z0-9\s\-áéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ]+$/.test(name);
+  };
 
   // Verificar se usuário está logado
   useEffect(() => {
@@ -56,12 +130,47 @@ export default function CollectiveRegistration() {
   }, []);
 
   const updateField = (field: keyof FormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    let formattedValue = value;
+
+    if (field === 'phone') {
+      formattedValue = formatPhone(value);
+    } else if (field === 'numMembers') {
+      // Apenas números positivos
+      const num = parseInt(value) || 1;
+      formattedValue = Math.max(1, num);
+    } else if (field === 'name') {
+      formattedValue = value.trim();
+    } else if (field === 'description') {
+      formattedValue = value.trim();
+    } else if (field === 'memberNames') {
+      formattedValue = value.trim();
+    } else if (field === 'password') {
+      formattedValue = value;
+    }
+
+    setFormData(prev => ({ ...prev, [field]: formattedValue }));
+    
+    // Limpar erro ao editar
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (!isValidImage(file)) {
+        setErrors(prev => ({
+          ...prev,
+          profilePicture: "Imagem inválida. Use JPG, PNG ou WebP (máx 5MB)"
+        }));
+        return;
+      }
+
       updateField('profilePicture', file);
       const reader = new FileReader();
       reader.onloadend = () => setImagePreview(reader.result as string);
@@ -79,33 +188,69 @@ export default function CollectiveRegistration() {
   };
 
   const validateForm = (): boolean => {
-    if (!formData.name || !formData.description || !formData.phone || 
-        !formData.socialLink || !formData.password) {
-      alert("Por favor, preencha todos os campos obrigatórios");
-      return false;
+    const newErrors: FormErrors = {};
+
+    // Nome obrigatório
+    if (!formData.name.trim()) {
+      newErrors.name = "Nome do coletivo é obrigatório";
+    } else if (!isValidCollectiveName(formData.name)) {
+      newErrors.name = "Nome deve ter mínimo 3 caracteres (apenas letras, números, hífens)";
     }
-    
+
+    // Descrição obrigatória
+    if (!formData.description.trim()) {
+      newErrors.description = "Descrição é obrigatória";
+    } else if (formData.description.trim().length < 20) {
+      newErrors.description = "Descrição deve ter mínimo 20 caracteres";
+    }
+
+    // Telefone obrigatório e válido
+    if (!formData.phone) {
+      newErrors.phone = "Telefone é obrigatório";
+    } else if (!isValidPhone(formData.phone)) {
+      newErrors.phone = "Telefone inválido (10 ou 11 dígitos)";
+    }
+
+    // Rede social obrigatória e válida
+    if (!formData.socialLink) {
+      newErrors.socialLink = "Link de rede social é obrigatório";
+    } else if (!isValidURL(formData.socialLink)) {
+      newErrors.socialLink = "URL inválida (ex: https://instagram.com/seu-coletivo)";
+    }
+
+    // Número de membros válido
+    if (!formData.numMembers || formData.numMembers < 1) {
+      newErrors.numMembers = "Número de membros deve ser pelo menos 1";
+    } else if (formData.numMembers > 999) {
+      newErrors.numMembers = "Número de membros não pode exceder 999";
+    }
+
+    // Validar nomes de membros se preenchido
+    if (formData.memberNames && !validateMemberNames(formData.memberNames)) {
+      newErrors.memberNames = "Nomes contêm caracteres inválidos";
+    }
+
+    // Categorias obrigatórias
     if (formData.categories.length === 0) {
-      alert("Selecione pelo menos uma categoria artística");
-      return false;
+      newErrors.categories = "Selecione pelo menos uma categoria";
     }
-    
-    if (formData.numMembers < 1) {
-      alert("O número de membros deve ser pelo menos 1");
-      return false;
+
+    // Senha obrigatória e válida
+    if (!formData.password) {
+      newErrors.password = "Senha é obrigatória";
+    } else if (!isValidPassword(formData.password)) {
+      newErrors.password = "Senha não atende aos requisitos";
     }
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert("As senhas não coincidem");
-      return false;
+
+    // Confirmação de senha
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = "Confirmação de senha é obrigatória";
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = "As senhas não coincidem";
     }
-    
-    if (formData.password.length < 6) {
-      alert("A senha deve ter pelo menos 6 caracteres");
-      return false;
-    }
-    
-    return true;
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async () => {
@@ -157,7 +302,7 @@ export default function CollectiveRegistration() {
   if (checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1e3a8a]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-bluePrimary"></div>
       </div>
     );
   }
@@ -178,13 +323,13 @@ export default function CollectiveRegistration() {
           <div className="flex flex-col gap-3">
             <a 
               href="/artistLogin" 
-              className="bg-[#1e3a8a] text-white px-6 py-3 rounded-lg hover:bg-[#15306e] transition font-semibold"
+              className="bg-bluePrimary text-white px-6 py-3 rounded-lg hover:opacity-90 transition font-semibold"
             >
               Fazer Login como Artista
             </a>
             <a 
               href="/artistRegistration" 
-              className="border-2 border-[#1e3a8a] text-[#1e3a8a] px-6 py-3 rounded-lg hover:bg-[#1e3a8a] hover:text-white transition font-semibold"
+              className="border-2 border-bluePrimary text-bluePrimary px-6 py-3 rounded-lg hover:bg-bluePrimary hover:text-white transition font-semibold"
             >
               Cadastrar como Artista
             </a>
@@ -195,7 +340,7 @@ export default function CollectiveRegistration() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-700 to-green-900 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-greenPrimary to-[#1a5f3f] py-12 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -218,11 +363,15 @@ export default function CollectiveRegistration() {
                 )}
               </div>
               <label className="cursor-pointer">
-                <span className="bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-800 transition inline-block">
+                <span className="bg-greenPrimary text-white px-4 py-2 rounded-lg hover:opacity-90 transition inline-block">
                   {imagePreview ? "Trocar Foto" : "Escolher Foto"}
                 </span>
                 <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
               </label>
+              {imagePreview && (
+                <p className="text-sm text-green-600 font-medium">✓ Foto carregada</p>
+              )}
+              {errors.profilePicture && <p className="text-red-600 text-sm">{errors.profilePicture}</p>}
             </div>
 
             {/* Nome do Coletivo */}
@@ -233,20 +382,23 @@ export default function CollectiveRegistration() {
                 value={formData.name}
                 onChange={(e) => updateField('name', e.target.value)}
                 placeholder="Ex: Coletivo Arte Urbana"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.name && <p className="text-red-600 text-sm mt-1">{errors.name}</p>}
             </div>
 
             {/* Descrição */}
             <div>
-              <label className="block font-semibold text-gray-700 mb-2">Descrição *</label>
+              <label className="block font-semibold text-gray-700 mb-2">Descrição * (mínimo 20 caracteres)</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => updateField('description', e.target.value)}
                 placeholder="Conte sobre o coletivo, sua história e objetivos..."
                 rows={4}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.description ? 'border-red-500' : 'border-gray-300'}`}
               />
+              <p className="text-xs text-gray-500 mt-1">{formData.description.length} caracteres</p>
+              {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
             </div>
 
             {/* Telefone */}
@@ -257,8 +409,9 @@ export default function CollectiveRegistration() {
                 value={formData.phone}
                 onChange={(e) => updateField('phone', e.target.value)}
                 placeholder="(00) 00000-0000"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.phone ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.phone && <p className="text-red-600 text-sm mt-1">{errors.phone}</p>}
             </div>
 
             {/* Rede Social */}
@@ -269,20 +422,23 @@ export default function CollectiveRegistration() {
                 value={formData.socialLink}
                 onChange={(e) => updateField('socialLink', e.target.value)}
                 placeholder="https://instagram.com/seu-coletivo"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.socialLink ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.socialLink && <p className="text-red-600 text-sm mt-1">{errors.socialLink}</p>}
             </div>
 
             {/* Número de Membros */}
             <div>
-              <label className="block font-semibold text-gray-700 mb-2">Número de Membros *</label>
+              <label className="block font-semibold text-gray-700 mb-2">Número de Membros * (1-999)</label>
               <input
                 type="number"
                 min="1"
+                max="999"
                 value={formData.numMembers}
                 onChange={(e) => updateField('numMembers', parseInt(e.target.value) || 1)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.numMembers ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.numMembers && <p className="text-red-600 text-sm mt-1">{errors.numMembers}</p>}
             </div>
 
             {/* Nomes dos Membros */}
@@ -296,8 +452,9 @@ export default function CollectiveRegistration() {
                 value={formData.memberNames}
                 onChange={(e) => updateField('memberNames', e.target.value)}
                 placeholder="João Silva, Maria Santos, Pedro Costa"
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.memberNames ? 'border-red-500' : 'border-gray-300'}`}
               />
+              {errors.memberNames && <p className="text-red-600 text-sm mt-1">{errors.memberNames}</p>}
             </div>
 
             {/* Categorias */}
@@ -305,9 +462,10 @@ export default function CollectiveRegistration() {
               <p className="font-semibold text-gray-700 mb-4">
                 Categorias Artísticas *
                 {formData.categories.length > 0 && (
-                  <span className="text-green-600 ml-2">({formData.categories.length} selecionadas)</span>
+                  <span className="text-greenPrimary ml-2">({formData.categories.length} selecionadas)</span>
                 )}
               </p>
+              {errors.categories && <p className="text-red-600 text-sm mb-3">{errors.categories}</p>}
               <div className="grid grid-cols-2 gap-3">
                 {categorias.map((cat) => (
                   <label key={cat} className="flex items-center gap-3 cursor-pointer hover:bg-white p-3 rounded transition">
@@ -315,7 +473,7 @@ export default function CollectiveRegistration() {
                       type="checkbox" 
                       checked={formData.categories.includes(cat)}
                       onChange={() => handleCategoryToggle(cat)}
-                      className="w-5 h-5 text-green-600 rounded"
+                      className="w-5 h-5 text-greenPrimary rounded"
                     />
                     <span className="text-gray-700">{cat}</span>
                   </label>
@@ -331,9 +489,17 @@ export default function CollectiveRegistration() {
                   type="password"
                   value={formData.password}
                   onChange={(e) => updateField('password', e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                  placeholder="Min 8 caracteres: maiúscula, minúscula, número e caractere especial"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.password ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {formData.password && (
+                  <p className={`text-sm mt-2 font-medium ${
+                    isValidPassword(formData.password) ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {getPasswordStrengthMessage(formData.password)}
+                  </p>
+                )}
+                {errors.password && <p className="text-red-600 text-sm mt-1">{errors.password}</p>}
               </div>
               <div>
                 <label className="block font-semibold text-gray-700 mb-2">Confirmar Senha *</label>
@@ -342,10 +508,15 @@ export default function CollectiveRegistration() {
                   value={formData.confirmPassword}
                   onChange={(e) => updateField('confirmPassword', e.target.value)}
                   placeholder="Digite a senha novamente"
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-600"
+                  className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-greenPrimary ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {errors.confirmPassword && <p className="text-red-600 text-sm mt-1">{errors.confirmPassword}</p>}
               </div>
             </div>
+
+            <p className="text-xs text-gray-500">
+              Requisitos: Min 8 caracteres, Maiúscula (A-Z), Minúscula (a-z), Número (0-9), Caractere especial (!@#$%...)
+            </p>
 
             {/* Info Box */}
             <div className="bg-blue-50 border-l-4 border-blue-500 p-4">
@@ -367,15 +538,15 @@ export default function CollectiveRegistration() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition font-semibold disabled:opacity-50"
+                className="flex-1 bg-greenPrimary text-white px-6 py-3 rounded-lg hover:opacity-90 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? "Cadastrando..." : "Cadastrar Coletivo"}
+                {loading ? "Cadastrando..." : "Cadastrar Coletivo ✓"}
               </button>
             </div>
           </div>
 
           <p className="text-center mt-6 text-gray-600">
-            Já tem um coletivo cadastrado? <a href="/collectiveLogin" className="text-green-600 hover:underline font-semibold">Faça login</a>
+            Já tem um coletivo cadastrado? <a href="/collectiveLogin" className="text-greenPrimary hover:underline font-semibold">Faça login</a>
           </p>
         </div>
       </div>

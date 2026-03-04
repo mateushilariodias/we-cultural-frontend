@@ -1,7 +1,7 @@
 // src/components/Hero.tsx
 export default function Hero() {
     return (
-        <section className="relative  bg-greenPrimary text-white py-40 lg:pt-52 lg:pb-40 px-4 lg:px-40">
+        <section className="relative w-full bg-greenPrimary text-white py-40 lg:pt-52 lg:pb-40 px-4 lg:px-40">
             <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8">
 
                 {/* Texto */}
