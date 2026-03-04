@@ -105,8 +105,7 @@ export default function CollectiveRegistration() {
 
   // Validar nomes de membros
   const validateMemberNames = (names: string): boolean => {
-    if (!names) return true; // Campo opcional
-    // Verificar se há apenas letras, números, espaços, hífens e vírgulas
+    if (!names) return true;
     return /^[a-zA-Z0-9\s\-,áéíóúâêôãõçÁÉÍÓÚÂÊÔÃÕÇ]*$/.test(names);
   };
 
@@ -135,7 +134,6 @@ export default function CollectiveRegistration() {
     if (field === 'phone') {
       formattedValue = formatPhone(value);
     } else if (field === 'numMembers') {
-      // Apenas números positivos
       const num = parseInt(value) || 1;
       formattedValue = Math.max(1, num);
     } else if (field === 'name') {
@@ -150,7 +148,6 @@ export default function CollectiveRegistration() {
 
     setFormData(prev => ({ ...prev, [field]: formattedValue }));
     
-    // Limpar erro ao editar
     if (errors[field]) {
       setErrors(prev => {
         const newErrors = { ...prev };
@@ -190,59 +187,50 @@ export default function CollectiveRegistration() {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Nome obrigatório
     if (!formData.name.trim()) {
       newErrors.name = "Nome do coletivo é obrigatório";
     } else if (!isValidCollectiveName(formData.name)) {
       newErrors.name = "Nome deve ter mínimo 3 caracteres (apenas letras, números, hífens)";
     }
 
-    // Descrição obrigatória
     if (!formData.description.trim()) {
       newErrors.description = "Descrição é obrigatória";
     } else if (formData.description.trim().length < 20) {
       newErrors.description = "Descrição deve ter mínimo 20 caracteres";
     }
 
-    // Telefone obrigatório e válido
     if (!formData.phone) {
       newErrors.phone = "Telefone é obrigatório";
     } else if (!isValidPhone(formData.phone)) {
       newErrors.phone = "Telefone inválido (10 ou 11 dígitos)";
     }
 
-    // Rede social obrigatória e válida
     if (!formData.socialLink) {
       newErrors.socialLink = "Link de rede social é obrigatório";
     } else if (!isValidURL(formData.socialLink)) {
       newErrors.socialLink = "URL inválida (ex: https://instagram.com/seu-coletivo)";
     }
 
-    // Número de membros válido
     if (!formData.numMembers || formData.numMembers < 1) {
       newErrors.numMembers = "Número de membros deve ser pelo menos 1";
     } else if (formData.numMembers > 999) {
       newErrors.numMembers = "Número de membros não pode exceder 999";
     }
 
-    // Validar nomes de membros se preenchido
     if (formData.memberNames && !validateMemberNames(formData.memberNames)) {
       newErrors.memberNames = "Nomes contêm caracteres inválidos";
     }
 
-    // Categorias obrigatórias
     if (formData.categories.length === 0) {
       newErrors.categories = "Selecione pelo menos uma categoria";
     }
 
-    // Senha obrigatória e válida
     if (!formData.password) {
       newErrors.password = "Senha é obrigatória";
     } else if (!isValidPassword(formData.password)) {
       newErrors.password = "Senha não atende aos requisitos";
     }
 
-    // Confirmação de senha
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Confirmação de senha é obrigatória";
     } else if (formData.password !== formData.confirmPassword) {
@@ -259,6 +247,30 @@ export default function CollectiveRegistration() {
     setLoading(true);
 
     try {
+      // Obter ID do usuário logado do localStorage
+      const artistDataStr = localStorage.getItem("artistData");
+      if (!artistDataStr) {
+        alert("Erro: Dados do artista não encontrados");
+        setLoading(false);
+        return;
+      }
+
+      let artistId: string;
+      try {
+        const artistData = JSON.parse(artistDataStr);
+        artistId = artistData._id || artistData.id;
+      } catch {
+        alert("Erro: Formato de dados inválido");
+        setLoading(false);
+        return;
+      }
+
+      if (!artistId) {
+        alert("Erro: ID do artista não encontrado");
+        setLoading(false);
+        return;
+      }
+
       const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
       
       const submitData = new FormData();
@@ -287,7 +299,8 @@ export default function CollectiveRegistration() {
 
       if (res.ok) {
         alert("✅ Coletivo cadastrado com sucesso!");
-        router.push("/collectiveLogin");
+        // Redirecionar para o login do coletivo com o ID do artista
+        router.push(`/dashboard/${artistId}/collectiveLogin`);
       } else {
         alert(data.message || "Erro ao cadastrar coletivo");
       }
@@ -530,7 +543,7 @@ export default function CollectiveRegistration() {
             <div className="flex gap-4 pt-4">
               <button
                 type="button"
-                onClick={() => router.push("/dashboard")}
+                onClick={() => router.back()}
                 className="flex-1 bg-gray-300 text-gray-800 px-6 py-3 rounded-lg hover:bg-gray-400 transition font-semibold"
               >
                 Cancelar

@@ -218,7 +218,7 @@ export default function Dashboard() {
                       >
                       📝 Cadastar Coletivo
                     </a>
-                                       <a 
+                    <a 
                       href={`/dashboard/${artist.id}/collectiveLogin`}
                       className="block px-4 py-2 hover:bg-gray-100 transition"
                       >
