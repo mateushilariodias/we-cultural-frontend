@@ -1,19 +1,19 @@
 // src/components/Hero.tsx
 export default function Hero() {
     return (
-        <section className="bg-greenPrimary text-white py-20 px-4 lg:px-40">
-            <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8">
+        <section className="relative  bg-greenPrimary text-white py-40 lg:pt-52 lg:pb-40 px-4 lg:px-40">
+            <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-8">
 
                 {/* Texto */}
                 <div className="flex-1 text-center lg:text-left">
-                    <h1 className="text-4xl lg:text-5xl font-bold mb-4">
+                    <h1 className="text-4xl lg:text-5xl font-bold mb-12">
                         Conectando <span className="text-yellow-500">Artistas</span> e Cultura
                     </h1>
                     <p className="text-lg mb-6">
                         A plataforma <strong>Nós Cultural</strong> é o espaço onde artistas de todas as áreas
                         podem se cadastrar, mostrar seus trabalhos e se conectar com o público.
                     </p>
-                    <p className="text-lg mb-6">
+                    <p className="text-lg mb-12">
                         O sistema é totalmente gratuito e visa promover a diversidade cultural, permitindo que artistas possuam maior visibilidade. É possivel ver também, por meio do dashboard disponível, as estatísticas de referentes aos artistas cadastrados, a respeito do cenário cultural Francano.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
