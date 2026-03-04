@@ -19,10 +19,10 @@ export default function Header() {
         <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
           Login de Artista
         </a>
-        <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
+        <a href="/equipmentRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
           Cadastrar Espaço
         </a>
-        <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
+        <a href="/equipmentLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
           Login de Espaço
         </a>
       </nav>
@@ -45,10 +45,10 @@ export default function Header() {
           <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black text-center">
             Login de Artista
           </a>
-            <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600 text-center">
+            <a href="/equipmentRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600 text-center">
             Cadastrar Espaço
           </a>
-          <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black text-center">
+          <a href="/artiequipmentLoginstLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black text-center">
             Login de Espaço
           </a>
         </div>
