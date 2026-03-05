@@ -316,7 +316,7 @@ export default function CollectiveDashboard() {
             <div className="flex gap-3">
               <button
                 onClick={handleLogout}
-                className="bg-white bg-opacity-20 text-white px-4 py-2 rounded-lg hover:bg-opacity-30 transition font-semibold"
+                className="bg-white bg-opacity-20 text-gray-600 px-4 py-2 rounded-lg hover:bg-opacity-30 transition font-semibold"
               >
                 🚪 Sair
               </button>
