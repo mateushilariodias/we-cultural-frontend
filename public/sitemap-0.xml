@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
+<url><loc>https://we-cultural-frontend.vercel.app/artistLogin</loc><lastmod>2026-03-16T18:30:29.345Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/artistRegistration</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/equipmentLogin</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/equipmentRegistration</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/forgotPassword</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/privacy</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/resetPassword</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/schedule</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/search</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://we-cultural-frontend.vercel.app/terms</loc><lastmod>2026-03-16T18:30:29.347Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+</urlset>
