@@ -6,7 +6,7 @@ export default function WeeklyProgramming() {
   const [shareMessage, setShareMessage] = useState<string>("");
 
   const handleShare = async (eventTitle: string) => {
-    const shareUrl = "https://we-cultural-frontend.vercel.app/programacao";
+    const shareUrl = "https://we-cultural-frontend.vercel.app/schedule";
     const shareText = `Confira este evento cultural: ${eventTitle}`;
 
     if (navigator.share) {
@@ -322,6 +322,27 @@ export default function WeeklyProgramming() {
       <footer className="bg-[#1e3a8a] text-white text-center p-4 mt-12">
         <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
         <p className="text-sm mt-2">Programação atualizada semanalmente</p>
+
+        <p className="text-sm mt-3">
+          Desenvolvido por{" "}
+          <a
+            href="https://www.instagram.com/marialuizaalves933"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-200"
+          >
+            @marialuizaalves933
+          </a>{" "}
+          e{" "}
+          <a
+            href="https://www.instagram.com/mateushilariodias"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-gray-200"
+          >
+            @mateushilariodias
+          </a>
+        </p>
       </footer>
     </div>
   );
