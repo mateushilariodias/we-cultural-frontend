@@ -1,10 +1,32 @@
 "use client";
 import { useState } from "react";
-import Image from "next/image";
-import { link } from "fs";
 
 export default function WeeklyProgramming() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState<string>("");
+
+  const handleShare = async (eventTitle: string) => {
+    const shareUrl = "https://we-cultural-frontend.vercel.app/programacao";
+    const shareText = `Confira este evento cultural: ${eventTitle}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Nós Cultural - Programação",
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (error) {
+        console.log("Compartilhamento cancelado");
+      }
+    } else {
+      // Fallback: copiar para clipboard
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        setShareMessage("✅ Link copiado!");
+        setTimeout(() => setShareMessage(""), 2000);
+      });
+    }
+  };
 
   const events = [
     {
@@ -265,10 +287,19 @@ export default function WeeklyProgramming() {
                       Saiba Mais
                     </a>
                   )}
-                  <button href="https://we-cultural-frontend.vercel.app/programacao" className="bg-green-600 text-white px-6 py-2 rounded font-semibold hover:bg-green-700 transition">
-                    Compartilhar
+                  <button
+                    onClick={() => handleShare(event.title)}
+                    className="bg-green-600 text-white px-6 py-2 rounded font-semibold hover:bg-green-700 transition"
+                  >
+                    🔗 Compartilhar
                   </button>
                 </div>
+
+                {shareMessage && (
+                  <div className="mt-2 text-green-600 text-sm font-semibold">
+                    {shareMessage}
+                  </div>
+                )}
               </div>
             </div>
           ))}
