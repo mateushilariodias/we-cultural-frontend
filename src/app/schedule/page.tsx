@@ -31,6 +31,31 @@ export default function WeeklyProgramming() {
   const events = [
     {
       id: "1",
+      date: "17/03/2026",
+      dayOfWeek: "terça-feira",
+      time: "18:30",
+      title: "Oficina Verso e Pirueta – Colagem - Recortes de Mim: Ancestralidade em Papel",
+      location: "CIRRCO",
+      address: "Av. Dr. Severino Márcio Pereira Meirelles, 2030 – Villagio Mundo Novo, Franca – SP",
+      description:
+        "Oficina gratuita voltada para mulheres da cidade de Franca. Uma imersão criativa que convida as participantes a refletirem sobre suas origens, ancestralidade e os legados transmitidos por mulheres que marcaram suas trajetórias. O projeto promove troca, fortalecimento de vínculos e reconhecimento da potência da experiência feminina.",
+      details: [
+        "Público exclusivo para mulheres",
+        "Encontros semanais sempre das 18h30 às 20h30",
+        "Imersão criativa sobre origens e ancestralidade",
+        "Coordenação: Carla Bastianini e Mariana Morais",
+        "Projeto Verso e Pirueta",
+        "Gratuito (necessária inscrição prévia pelo Instagram @projetoversoepirueta)",
+        "Realização: Secretaria de Esporte e Cultura de Franca - Bolsa Cultura",
+        "Para esta vivência é importante disponibilidade para os encontros de 24 e 31 de março"
+      ],
+      social: {
+        instagram: "https://www.instagram.com/projetoversoepirueta/"
+      },
+      color: "from-indigo-500 to-purple-500"
+    },
+    {
+      id: "2",
       date: "20/03/2026",
       dayOfWeek: "sexta-feira",
       time: "19:30",
@@ -51,7 +76,7 @@ export default function WeeklyProgramming() {
       color: "from-purple-500 to-pink-500",
     },
     {
-      id: "2",
+      id: "3",
       date: "20/03/2026",
       dayOfWeek: "sexta-feira, sábado e domingo",
       time: "19:00",
@@ -70,7 +95,7 @@ export default function WeeklyProgramming() {
       color: "from-blue-500 to-cyan-500",
     },
     {
-      id: "3",
+      id: "4",
       date: "21/03/2026",
       dayOfWeek: "sábado",
       time: "14:00",
@@ -91,7 +116,7 @@ export default function WeeklyProgramming() {
       color: "from-green-500 to-emerald-500",
     },
     {
-      id: "4",
+      id: "5",
       date: "21/03/2026",
       dayOfWeek: "sábado",
       time: "10:00",
@@ -109,7 +134,7 @@ export default function WeeklyProgramming() {
       color: "from-red-500 to-rose-500",
     },
     {
-      id: "5",
+      id: "6",
       date: "21/03/2026",
       dayOfWeek: "sábado",
       time: "16:00",
