@@ -1,34 +1,16 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function WeeklyProgramming() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string>("");
+  const [databaseEvents, setDatabaseEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleShare = async (eventTitle: string) => {
-    const shareUrl = "https://we-cultural-frontend.vercel.app/schedule";
-    const shareText = `Confira este evento cultural: ${eventTitle}`;
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Nós Cultural - Programação",
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.log("Compartilhamento cancelado");
-      }
-    } else {
-      // Fallback: copiar para clipboard
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        setShareMessage("✅ Link copiado!");
-        setTimeout(() => setShareMessage(""), 2000);
-      });
-    }
-  };
-
-  const events = [
+  // Eventos hardcoded (semana 16-22 de março)
+  const hardcodedEvents = [
     {
       id: "1",
       date: "17/03/2026",
@@ -38,7 +20,7 @@ export default function WeeklyProgramming() {
       location: "CIRRCO",
       address: "Av. Dr. Severino Márcio Pereira Meirelles, 2030 – Villagio Mundo Novo, Franca – SP",
       description:
-        "Oficina gratuita voltada para mulheres da cidade de Franca. Uma imersão criativa que convida as participantes a refletirem sobre suas origens, ancestralidade e os legados transmitidos por mulheres que marcaram suas trajetórias. O projeto promove troca, fortalecimento de vínculos e reconhecimento da potência da experiência feminina.",
+        "Oficina gratuita voltada para mulheres da cidade de Franca. Uma imersão criativa que convida as participantes a refletirem sobre suas origens, ancestralidade e os legados transmitidos por mulheres que marcaram suas trajetórias.",
       details: [
         "Público exclusivo para mulheres",
         "Encontros semanais sempre das 18h30 às 20h30",
@@ -47,7 +29,6 @@ export default function WeeklyProgramming() {
         "Projeto Verso e Pirueta",
         "Gratuito (necessária inscrição prévia pelo Instagram @projetoversoepirueta)",
         "Realização: Secretaria de Esporte e Cultura de Franca - Bolsa Cultura",
-        "Para esta vivência é importante disponibilidade para os encontros de 24 e 31 de março"
       ],
       social: {
         instagram: "https://www.instagram.com/projetoversoepirueta/"
@@ -153,11 +134,71 @@ export default function WeeklyProgramming() {
     }
   ];
 
-  const sortedEvents = [...events].sort((a, b) => {
+  // Carregar eventos do banco de dados
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await fetch(`${API_URL}/api/events`);
+        const data = await response.json();
+        
+        if (data.events) {
+          console.log("✅ Eventos do banco de dados carregados:", data.events.length);
+          setDatabaseEvents(data.events);
+        }
+      } catch (error) {
+        console.log("⚠️ Erro ao carregar eventos do banco:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const handleShare = async (eventTitle: string) => {
+    const shareUrl = "https://we-cultural-frontend.vercel.app/programacao";
+    const shareText = `Confira este evento cultural: ${eventTitle}`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "Nós Cultural - Programação",
+          text: shareText,
+          url: shareUrl,
+        });
+      } catch (error) {
+        console.log("Compartilhamento cancelado");
+      }
+    } else {
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        setShareMessage("✅ Link copiado!");
+        setTimeout(() => setShareMessage(""), 2000);
+      });
+    }
+  };
+
+  // Combinar eventos: hardcoded + banco de dados
+  const allEvents = [...hardcodedEvents, ...databaseEvents];
+
+  const sortedEvents = [...allEvents].sort((a, b) => {
     const dateA = a.date === "Sem data confirmada" ? "99/99/9999" : a.date;
     const dateB = b.date === "Sem data confirmada" ? "99/99/9999" : b.date;
     return dateA.localeCompare(dateB);
   });
+
+  const getColorValue = (colorClass: string) => {
+    const colorMap: any = {
+      "to-pink-500": "#ec4899",
+      "to-cyan-500": "#06b6d4",
+      "to-emerald-500": "#10b981",
+      "to-orange-500": "#f97316",
+      "to-rose-500": "#f43f5e",
+      "to-purple-500": "#a855f7",
+    };
+
+    const colorKey = colorClass.split(" ")[1];
+    return colorMap[colorKey] || "#1e3a8a";
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -168,6 +209,7 @@ export default function WeeklyProgramming() {
           <nav className="flex gap-4">
             <a href="/" className="hover:underline">Home</a>
             <a href="/search" className="hover:underline">Ver Artistas</a>
+            <a href="/admin/events" className="hover:underline text-yellow-300">📅 Admin</a>
           </nav>
         </div>
       </header>
@@ -179,6 +221,7 @@ export default function WeeklyProgramming() {
           <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-8">
             <h1 className="text-4xl font-bold mb-2">Programação Cultural</h1>
             <p className="text-xl opacity-90">Semana de 16 a 22 de Março de 2026</p>
+            {loading && <p className="text-sm mt-2">Carregando eventos...</p>}
           </div>
         </div>
 
@@ -189,6 +232,11 @@ export default function WeeklyProgramming() {
             leituras dramáticas e muito mais aguardam você. Todos os eventos promovem inclusão, acessibilidade 
             (com intérpretes de libras) e acesso democrático à cultura.
           </p>
+          {databaseEvents.length > 0 && (
+            <p className="text-green-600 font-semibold mt-4">
+              ✅ {databaseEvents.length} evento(s) adicionado(s) via CMS
+            </p>
+          )}
         </div>
 
         {/* Events Grid */}
@@ -200,16 +248,13 @@ export default function WeeklyProgramming() {
               key={event.id}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border-l-4"
               style={{
-                borderLeftColor: event.color.split(" ")[1] === "to-pink-500" ? "#ec4899" : 
-                               event.color.split(" ")[1] === "to-cyan-500" ? "#06b6d4" :
-                               event.color.split(" ")[1] === "to-emerald-500" ? "#10b981" :
-                               event.color.split(" ")[1] === "to-orange-500" ? "#f97316" : "#f43f5e"
+                borderLeftColor: getColorValue(event.color),
               }}
             >
               <div className="p-6">
                 {/* Header */}
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
-                  <div>
+                  <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-sm font-semibold text-white bg-[#1e3a8a] px-3 py-1 rounded-full">
                         {event.date}
@@ -219,6 +264,11 @@ export default function WeeklyProgramming() {
                     </div>
                     <h3 className="text-2xl font-bold text-[#1e3a8a]">{event.title}</h3>
                   </div>
+                  {event.image && (
+                    <div className="w-24 h-24 flex-shrink-0">
+                      <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded" />
+                    </div>
+                  )}
                 </div>
 
                 {/* Location */}
@@ -244,7 +294,7 @@ export default function WeeklyProgramming() {
 
                     {expandedEvent === event.id && (
                       <div className="mt-3 pl-4 border-l-2 border-gray-300 space-y-2">
-                        {event.details.map((detail, idx) => (
+                        {event.details.map((detail: string, idx: number) => (
                           <p key={idx} className="text-gray-600 text-sm flex items-start gap-2">
                             <span className="text-[#1e3a8a] font-bold">✓</span>
                             {detail}
@@ -260,7 +310,7 @@ export default function WeeklyProgramming() {
                   <div className="mb-4 bg-gray-50 p-3 rounded">
                     <p className="font-semibold text-gray-700 mb-2">📅 Datas:</p>
                     <div className="space-y-1">
-                      {event.dates.map((date, idx) => (
+                      {event.dates.map((date: string, idx: number) => (
                         <p key={idx} className="text-gray-600 text-sm">• {date}</p>
                       ))}
                     </div>
