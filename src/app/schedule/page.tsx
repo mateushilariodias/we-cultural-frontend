@@ -1,203 +1,80 @@
 "use client";
 import { useState, useEffect } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+// Formata ISO date → "DD/MM/AAAA"
+const formatDate = (raw: string | Date): string => {
+  if (!raw) return "Sem data";
+  const d = new Date(raw);
+  if (isNaN(d.getTime())) return String(raw);
+  return d.toLocaleDateString("pt-BR");
+};
 
 export default function WeeklyProgramming() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string>("");
   const [databaseEvents, setDatabaseEvents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [weekInfo, setWeekInfo] = useState<{ start: string; end: string } | null>(null);
 
-  // Eventos hardcoded (semana 16-22 de março)
-  const hardcodedEvents = [
-    {
-      id: "1",
-      date: "17/03/2026",
-      dayOfWeek: "terça-feira",
-      time: "18:30",
-      title: "Oficina Verso e Pirueta – Colagem - Recortes de Mim: Ancestralidade em Papel",
-      location: "CIRRCO",
-      address: "Av. Dr. Severino Márcio Pereira Meirelles, 2030 – Villagio Mundo Novo, Franca – SP",
-      description:
-        "Oficina gratuita voltada para mulheres da cidade de Franca. Uma imersão criativa que convida as participantes a refletirem sobre suas origens, ancestralidade e os legados transmitidos por mulheres que marcaram suas trajetórias.",
-      details: [
-        "Público exclusivo para mulheres",
-        "Encontros semanais sempre das 18h30 às 20h30",
-        "Imersão criativa sobre origens e ancestralidade",
-        "Coordenação: Carla Bastianini e Mariana Morais",
-        "Projeto Verso e Pirueta",
-        "Gratuito (necessária inscrição prévia pelo Instagram @projetoversoepirueta)",
-        "Realização: Secretaria de Esporte e Cultura de Franca - Bolsa Cultura",
-      ],
-      social: {
-        instagram: "https://www.instagram.com/projetoversoepirueta/"
-      },
-      color: "from-indigo-500 to-purple-500"
-    },
-    {
-      id: "2",
-      date: "20/03/2026",
-      dayOfWeek: "sexta-feira",
-      time: "19:30",
-      title: "Leitura Dramática 40+",
-      location: "Casa do Artista Francano",
-      address: "Rua Dr. Alcindo Ribeiro Conrado, 1516 – Centro, Franca – SP",
-      description:
-        "Um trabalho lindo, fruto de um projeto que busca dar visibilidade à mulher nesse período tão significativo. Este projeto foi contemplado pelo Edital Bolsa Cultura, com apoio da Prefeitura Municipal de Franca e da FEAC.",
-      details: [
-        "Intérprete de libras presente",
-        "Primeira apresentação",
-        "Projeto contemplado pelo Edital Bolsa Cultura",
-      ],
-      social: {
-        instagram: "https://www.instagram.com/projetocultural40mais/",
-        facebook: "https://www.facebook.com/ProjetoCultural40Mais/",
-      },
-      color: "from-purple-500 to-pink-500",
-    },
-    {
-      id: "3",
-      date: "20/03/2026",
-      dayOfWeek: "sexta-feira, sábado e domingo",
-      time: "19:00",
-      title: "Um Banquete para o Artista da Fome",
-      location: "IPRA - Pontão de Cultura Pedra no Sapato",
-      address: "R. Diogo Feijó, 1956 - Estação, Franca - SP",
-      description:
-        "Reestreia do espetáculo - uma comédia dramática que reflete sobre a relevância da cultura e dos artistas em nossa sociedade.",
-      details: [
-        "Convite gratuito (retirar com até 30 min de antecedência)",
-        "Recomendação etária: 16 anos",
-        "Sessão com Libras no sábado (21/3)",
-      ],
-      dates: ["20/3 (sexta)", "21/3 (sábado)", "22/3 (domingo)"],
-      artist: "Cia. Antares",
-      color: "from-blue-500 to-cyan-500",
-    },
-    {
-      id: "4",
-      date: "21/03/2026",
-      dayOfWeek: "sábado",
-      time: "14:00",
-      title: "Aulão de Impro",
-      location: "Ponto de Cultura Espaço Nulo",
-      address: "R. Maria Cândida de Vilhena, 530 - Jardim Dr. Antonio Petraglia, Franca - SP",
-      description:
-        "Primeiro aulão de improvisação teatral (de 4 encontros independentes) focado em jogos clássicos de improviso.",
-      details: [
-        "Estimula criatividade e espontaneidade",
-        "Desenvolve habilidades de improvisação",
-        "Preparação para o espetáculo Improkê",
-        "Público: a partir de 16 anos",
-        "Iniciantes e experientes bem-vindos",
-      ],
-      time_range: "14:00 - 18:00",
-      link: "https://www.espaconulo.com/events/1-aulao-de-impro-21-03-26-improke",
-      color: "from-green-500 to-emerald-500",
-    },
-    {
-      id: "5",
-      date: "21/03/2026",
-      dayOfWeek: "sábado",
-      time: "10:00",
-      title: "Oficina: Borboletas - Histórias e Sons em Movimento",
-      location: "SESI FRANCA e SESI PIRACICABA",
-      description:
-        "Imersão artística que integra contação de histórias, percepção sonora e investigação do ritmo no corpo.",
-      details: [
-        "Público: estudantes, educadores, artistas",
-        "Processo criativo colaborativo",
-        "Integra narrativa, som e movimento",
-        "Diálogo com questões sociais, raciais e de gênero",
-      ],
-      link: "https://www.sesisp.org.br/agenda/agenda-oficinas-borboletas-historias-e-sons-em-movimento",
-      color: "from-red-500 to-rose-500",
-    },
-    {
-      id: "6",
-      date: "21/03/2026",
-      dayOfWeek: "sábado",
-      time: "16:00",
-      title: "Borboletas",
-      location: "SESI FRANCA e SESI PIRACICABA",
-      description:
-        "Espetáculo que equilibra ludicidade e poesia para narrar as dificuldades enfrentadas por crianças periféricas.",
-      details: [
-        "Classificação: Livre",
-        "Cia. Teatral Sonharteiros",
-        "Teatro como instrumento de transformação social",
-        "Temáticas: trabalho infantil, violência, desesperança",
-      ],
-      link: "https://www.sesisp.org.br/agenda/agenda-espetaculo-borboletas",
-      color: "from-yellow-500 to-orange-500",
-    }
-  ];
-
-  // Carregar eventos do banco de dados
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         const response = await fetch(`${API_URL}/api/events`);
         const data = await response.json();
-        
+
         if (data.events) {
-          console.log("✅ Eventos do banco de dados carregados:", data.events.length);
           setDatabaseEvents(data.events);
+          setWeekInfo(data.week);
+          console.log(`✅ ${data.events.length} evento(s) carregado(s)`);
         }
       } catch (error) {
-        console.log("⚠️ Erro ao carregar eventos do banco:", error);
+        console.error("⚠️ Erro ao carregar eventos:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvents();
+    const interval = setInterval(fetchEvents, 3_600_000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleShare = async (eventTitle: string) => {
-    const shareUrl = "https://we-cultural-frontend.vercel.app/programacao";
+    const shareUrl = "https://we-cultural-frontend.vercel.app/schedule";
     const shareText = `Confira este evento cultural: ${eventTitle}`;
 
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: "Nós Cultural - Programação",
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch (error) {
-        console.log("Compartilhamento cancelado");
+        await navigator.share({ title: "Nós Cultural - Programação", text: shareText, url: shareUrl });
+      } catch {
+        // cancelado pelo usuário
       }
     } else {
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        setShareMessage("✅ Link copiado!");
-        setTimeout(() => setShareMessage(""), 2000);
-      });
+      await navigator.clipboard.writeText(shareUrl);
+      setShareMessage("✅ Link copiado!");
+      setTimeout(() => setShareMessage(""), 2000);
     }
   };
 
-  // Combinar eventos: hardcoded + banco de dados
-  const allEvents = [...hardcodedEvents, ...databaseEvents];
-
-  const sortedEvents = [...allEvents].sort((a, b) => {
-    const dateA = a.date === "Sem data confirmada" ? "99/99/9999" : a.date;
-    const dateB = b.date === "Sem data confirmada" ? "99/99/9999" : b.date;
-    return dateA.localeCompare(dateB);
+  // Ordena por date ISO (funciona corretamente com Date do MongoDB)
+  const sortedEvents = [...databaseEvents].sort((a, b) => {
+    const ta = a.date ? new Date(a.date).getTime() : Infinity;
+    const tb = b.date ? new Date(b.date).getTime() : Infinity;
+    return ta - tb;
   });
 
-  const getColorValue = (colorClass: string) => {
-    const colorMap: any = {
-      "to-pink-500": "#ec4899",
-      "to-cyan-500": "#06b6d4",
-      "to-emerald-500": "#10b981",
-      "to-orange-500": "#f97316",
-      "to-rose-500": "#f43f5e",
-      "to-purple-500": "#a855f7",
+  const getBorderColor = (colorClass: string): string => {
+    const map: Record<string, string> = {
+      "from-purple-500 to-pink-500": "#ec4899",
+      "from-blue-500 to-cyan-500": "#06b6d4",
+      "from-green-500 to-emerald-500": "#10b981",
+      "from-red-500 to-rose-500": "#f43f5e",
+      "from-yellow-500 to-orange-500": "#f97316",
+      "from-pink-600 to-purple-600": "#a855f7",
     };
-
-    const colorKey = colorClass.split(" ")[1];
-    return colorMap[colorKey] || "#1e3a8a";
+    return map[colorClass] ?? "#1e3a8a";
   };
 
   return (
@@ -214,64 +91,91 @@ export default function WeeklyProgramming() {
         </div>
       </header>
 
-      {/* Main Content */}
+      {/* Main */}
       <div className="flex-1 px-4 lg:px-40 py-12">
         {/* Banner */}
-        <div className="mb-12 relative h-64 bg-gradient-to-r from-[#1e3a8a] to-purple-700 rounded-lg overflow-hidden shadow-lg">
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center p-8">
+        <div className="mb-12 relative h-64 bg-gradient-to-r from-[#1e3a8a] to-purple-700 rounded-lg overflow-hidden shadow-lg flex items-center justify-center">
+          <div className="text-white text-center p-8">
             <h1 className="text-4xl font-bold mb-2">Programação Cultural</h1>
-            <p className="text-xl opacity-90">Semana de 16 a 22 de Março de 2026</p>
-            {loading && <p className="text-sm mt-2">Carregando eventos...</p>}
+            {weekInfo ? (
+              <p className="text-xl opacity-90">
+                Semana de {weekInfo.start} a {weekInfo.end}
+              </p>
+            ) : (
+              <p className="text-xl opacity-90">Carregando programação...</p>
+            )}
+            {loading && <p className="text-sm mt-2 animate-pulse">Atualizando eventos...</p>}
           </div>
         </div>
 
-        {/* Description */}
+        {/* Resumo */}
         <div className="mb-12 max-w-4xl">
           <p className="text-gray-700 text-lg leading-relaxed">
-            Confira a programação cultural da semana em Franca! Apresentações teatrais, aulões de improvisação, 
-            leituras dramáticas e muito mais aguardam você. Todos os eventos promovem inclusão, acessibilidade 
-            (com intérpretes de libras) e acesso democrático à cultura.
+            Confira a programação cultural da semana em Franca!
           </p>
-          {databaseEvents.length > 0 && (
+          {!loading && databaseEvents.length > 0 && (
             <p className="text-green-600 font-semibold mt-4">
-              ✅ {databaseEvents.length} evento(s) adicionado(s) via CMS
+              ✅ {databaseEvents.length} evento(s) nesta semana
+            </p>
+          )}
+          {!loading && databaseEvents.length === 0 && (
+            <p className="text-orange-600 font-semibold mt-4">
+              ⏳ Nenhum evento cadastrado para esta semana
             </p>
           )}
         </div>
 
-        {/* Events Grid */}
+        {/* Lista */}
         <div className="space-y-6">
           <h2 className="text-3xl font-bold text-[#1e3a8a] mb-8">Eventos da Semana</h2>
 
+          {loading && (
+            <div className="text-center py-12 text-gray-500">Carregando eventos...</div>
+          )}
+
+          {!loading && sortedEvents.length === 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+              <p className="text-yellow-700">
+                Nenhum evento cadastrado para esta semana. Verifique novamente na próxima semana!
+              </p>
+            </div>
+          )}
+
           {sortedEvents.map((event) => (
             <div
-              key={event.id}
+              key={event._id}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border-l-4"
-              style={{
-                borderLeftColor: getColorValue(event.color),
-              }}
+              style={{ borderLeftColor: getBorderColor(event.color) }}
             >
               <div className="p-6">
-                {/* Header */}
+                {/* Cabeçalho */}
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span className="text-sm font-semibold text-white bg-[#1e3a8a] px-3 py-1 rounded-full">
-                        {event.date}
+                        {formatDate(event.date)}
                       </span>
-                      <span className="text-sm text-gray-600">{event.dayOfWeek}</span>
-                      {event.time && <span className="text-sm font-semibold text-gray-700">• {event.time}</span>}
+                      {event.dayOfWeek && (
+                        <span className="text-sm text-gray-600">{event.dayOfWeek}</span>
+                      )}
+                      {event.time && (
+                        <span className="text-sm font-semibold text-gray-700">• {event.time}</span>
+                      )}
                     </div>
                     <h3 className="text-2xl font-bold text-[#1e3a8a]">{event.title}</h3>
                   </div>
                   {event.image && (
                     <div className="w-24 h-24 flex-shrink-0">
-                      <img src={event.image} alt={event.title} className="w-full h-full object-cover rounded" />
+                      <img
+                        src={event.image}
+                        alt={event.title}
+                        className="w-full h-full object-cover rounded"
+                      />
                     </div>
                   )}
                 </div>
 
-                {/* Location */}
+                {/* Local */}
                 <div className="mb-4 pb-4 border-b border-gray-200">
                   <p className="text-gray-600 mb-1">
                     <span className="font-semibold">📍 Local:</span> {event.location}
@@ -279,20 +183,21 @@ export default function WeeklyProgramming() {
                   <p className="text-sm text-gray-500">{event.address}</p>
                 </div>
 
-                {/* Description */}
+                {/* Descrição */}
                 <p className="text-gray-700 mb-4 leading-relaxed">{event.description}</p>
 
-                {/* Details */}
+                {/* Detalhes expansíveis */}
                 {event.details && event.details.length > 0 && (
                   <div className="mb-4">
                     <button
-                      onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
+                      onClick={() =>
+                        setExpandedEvent(expandedEvent === event._id ? null : event._id)
+                      }
                       className="text-[#1e3a8a] font-semibold hover:underline text-sm"
                     >
-                      {expandedEvent === event.id ? "▼ Menos detalhes" : "▶ Mais detalhes"}
+                      {expandedEvent === event._id ? "▼ Menos detalhes" : "▶ Mais detalhes"}
                     </button>
-
-                    {expandedEvent === event.id && (
+                    {expandedEvent === event._id && (
                       <div className="mt-3 pl-4 border-l-2 border-gray-300 space-y-2">
                         {event.details.map((detail: string, idx: number) => (
                           <p key={idx} className="text-gray-600 text-sm flex items-start gap-2">
@@ -305,27 +210,29 @@ export default function WeeklyProgramming() {
                   </div>
                 )}
 
-                {/* Multiple Dates */}
-                {event.dates && (
+                {/* Datas múltiplas */}
+                {event.dates && event.dates.length > 0 && (
                   <div className="mb-4 bg-gray-50 p-3 rounded">
                     <p className="font-semibold text-gray-700 mb-2">📅 Datas:</p>
                     <div className="space-y-1">
                       {event.dates.map((date: string, idx: number) => (
-                        <p key={idx} className="text-gray-600 text-sm">• {date}</p>
+                        <p key={idx} className="text-gray-600 text-sm">
+                          • {formatDate(date)}
+                        </p>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Artist Info */}
+                {/* Artista */}
                 {event.artist && (
                   <p className="text-sm text-gray-600 mb-4">
                     <span className="font-semibold">🎭 Realização:</span> {event.artist}
                   </p>
                 )}
 
-                {/* Social Links */}
-                {event.social && (
+                {/* Redes sociais */}
+                {event.social && (event.social.instagram || event.social.facebook) && (
                   <div className="flex gap-4 mb-4">
                     {event.social.instagram && (
                       <a
@@ -350,8 +257,8 @@ export default function WeeklyProgramming() {
                   </div>
                 )}
 
-                {/* Action Button */}
-                <div className="flex gap-3">
+                {/* Ações */}
+                <div className="flex flex-wrap gap-3">
                   {event.link && (
                     <a
                       href={event.link}
@@ -371,23 +278,21 @@ export default function WeeklyProgramming() {
                 </div>
 
                 {shareMessage && (
-                  <div className="mt-2 text-green-600 text-sm font-semibold">
-                    {shareMessage}
-                  </div>
+                  <p className="mt-2 text-green-600 text-sm font-semibold">{shareMessage}</p>
                 )}
               </div>
             </div>
           ))}
         </div>
 
-        {/* Info Box */}
+        {/* Info box */}
         <div className="mt-12 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-xl font-bold text-[#1e3a8a] mb-3">ℹ️ Informações Importantes</h3>
           <ul className="space-y-2 text-gray-700">
+            <li>✓ Programação atualiza automaticamente toda segunda-feira</li>
+            <li>✓ Semana começa na segunda e termina no domingo</li>
             <li>✓ A maioria dos eventos possuem acessibilidade com intérpretes de libras</li>
             <li>✓ Muitos eventos contam com apoio da Prefeitura Municipal de Franca e FEAC</li>
-            <li>✓ A maioria dos eventos é gratuito - verifique com cada organizador</li>
-            <li>✓ Recomendação etária: consulte cada evento para detalhes</li>
             <li>✓ Reserve seus ingressos com antecedência quando necessário</li>
           </ul>
         </div>
@@ -395,20 +300,10 @@ export default function WeeklyProgramming() {
 
       {/* Footer */}
       <footer className="bg-[#1e3a8a] text-white text-center p-4 mt-12">
-        <p>© 2025 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
+        <p>© 2026 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
         <p className="text-sm mt-2">Programação atualizada semanalmente</p>
-
         <p className="text-sm mt-3">
           Desenvolvido por{" "}
-          <a
-            href="https://www.instagram.com/marialuizaalves933"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-gray-200"
-          >
-            @marialuizaalves933
-          </a>{" "}
-          e{" "}
           <a
             href="https://www.instagram.com/mateushilariodias"
             target="_blank"
