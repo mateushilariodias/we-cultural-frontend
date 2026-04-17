@@ -371,7 +371,9 @@ export default function ArtistSettings() {
                     {artist.birthDate && (
                       <div>
                         <label className="text-sm font-semibold text-gray-700">Data de Nascimento</label>
-                        <p className="text-gray-900">{new Date(artist.birthDate).toLocaleDateString('pt-BR')}</p>
+                          <p className="text-gray-900">
+                            {new Date(artist.birthDate + 'T12:00:00').toLocaleDateString('pt-BR')}
+                          </p>
                       </div>
                     )}
 

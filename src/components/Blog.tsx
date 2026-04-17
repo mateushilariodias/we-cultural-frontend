@@ -101,7 +101,7 @@ export default function BlogSection() {
                 🗓️ Ver Programação Cultural Completa da Semana
               </a>
               <a 
-                href='https://www.instagram.com/mateushilariodias/'
+                href='https://www.instagram.com/macarte_oficial/'
                 className="px-6 py-3 bg-white text-[#1e3a8a] font-semibold border-2 border-[#1e3a8a] rounded hover:bg-[#1e3a8a] hover:text-white transition"
               >
                 🔔 Acompanhe Nossas Redes
