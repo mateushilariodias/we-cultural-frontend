@@ -100,9 +100,9 @@ export default function AboutSection() {
           <h3 className="text-2xl font-bold mb-8 text-center">Impacto na Comunidade</h3>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
             {[
-              { number: '6+', label: 'Artistas Cadastrados' },
+              { number: '12+', label: 'Artistas Cadastrados' },
               { number: '12', label: 'Categorias Artísticas' },
-              { number: '1', label: 'Coletivos' },
+              { number: '2+', label: 'Coletivos' },
               { number: '1', label: 'Espaços Culturais' }
             ].map((stat, index) => (
               <div key={index}>

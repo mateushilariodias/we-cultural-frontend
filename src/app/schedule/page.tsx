@@ -86,7 +86,7 @@ export default function WeeklyProgramming() {
           <nav className="flex gap-4">
             <a href="/" className="hover:underline">Home</a>
             <a href="/search" className="hover:underline">Ver Artistas</a>
-            <a href="/admin/events" className="hover:underline text-yellow-300">📅 Admin</a>
+            {/* <a href="/admin/events" className="hover:underline text-yellow-300">📅 Admin</a> */}
           </nav>
         </div>
       </header>
