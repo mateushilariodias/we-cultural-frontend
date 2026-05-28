@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import Link from "next/link";
+import { API_URL } from "@/config/api";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -52,8 +52,8 @@ export default function ForgotPassword() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-4">
-            <a href="/" className="hover:underline">Home</a>
-            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <Link href="/" className="hover:underline">Home</Link>
+            <a href="/search" className="hover:underline">Ver Cadastros</a>
           </nav>
         </div>
       </header>

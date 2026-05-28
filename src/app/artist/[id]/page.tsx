@@ -1,6 +1,7 @@
 "use client";
 
 import { use, useEffect, useState } from "react";
+import Image from "next/image";
 import { API_ENDPOINTS } from "@/config/api";
 
 interface Artist {
@@ -67,9 +68,11 @@ export default function ArtistProfile({
           {/* Profile Header - Mobile Friendly */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6">
             {artist.profilePicture ? (
-              <img
+              <Image
                 src={artist.profilePicture}
                 alt={artist.name}
+                width={160}
+                height={160}
                 className="w-32 h-32 lg:w-40 lg:h-40 rounded-full object-cover shadow-lg border-4 border-[#1e3a8a]"
               />
             ) : (

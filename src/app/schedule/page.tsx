@@ -1,7 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { API_URL } from "@/config/api";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+interface EventItem {
+  _id: string;
+  title: string;
+  description?: string;
+  date?: string;
+  dayOfWeek?: string;
+  time?: string;
+  location?: string;
+  address?: string;
+  image?: string;
+  color?: string;
+  artist?: string;
+  link?: string;
+  details?: string[];
+  dates?: string[];
+  social?: { instagram?: string; facebook?: string };
+}
 
 // Formata ISO date → "DD/MM/AAAA"
 const formatDate = (raw: string | Date): string => {
@@ -14,7 +33,7 @@ const formatDate = (raw: string | Date): string => {
 export default function WeeklyProgramming() {
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string>("");
-  const [databaseEvents, setDatabaseEvents] = useState<any[]>([]);
+  const [databaseEvents, setDatabaseEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [weekInfo, setWeekInfo] = useState<{ start: string; end: string } | null>(null);
 
@@ -27,7 +46,6 @@ export default function WeeklyProgramming() {
         if (data.events) {
           setDatabaseEvents(data.events);
           setWeekInfo(data.week);
-          console.log(`✅ ${data.events.length} evento(s) carregado(s)`);
         }
       } catch (error) {
         console.error("⚠️ Erro ao carregar eventos:", error);
@@ -84,8 +102,8 @@ export default function WeeklyProgramming() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-4">
-            <a href="/" className="hover:underline">Home</a>
-            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <Link href="/" className="hover:underline">Home</Link>
+            <a href="/search" className="hover:underline">Ver Cadastros</a>
             {/* <a href="/admin/events" className="hover:underline text-yellow-300">📅 Admin</a> */}
           </nav>
         </div>
@@ -145,7 +163,7 @@ export default function WeeklyProgramming() {
             <div
               key={event._id}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow overflow-hidden border-l-4"
-              style={{ borderLeftColor: getBorderColor(event.color) }}
+              style={{ borderLeftColor: getBorderColor(event.color ?? "") }}
             >
               <div className="p-6">
                 {/* Cabeçalho */}
@@ -153,7 +171,7 @@ export default function WeeklyProgramming() {
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       <span className="text-sm font-semibold text-white bg-[#1e3a8a] px-3 py-1 rounded-full">
-                        {formatDate(event.date)}
+                        {event.date ? formatDate(event.date) : "Sem data"}
                       </span>
                       {event.dayOfWeek && (
                         <span className="text-sm text-gray-600">{event.dayOfWeek}</span>
@@ -165,11 +183,13 @@ export default function WeeklyProgramming() {
                     <h3 className="text-2xl font-bold text-[#1e3a8a]">{event.title}</h3>
                   </div>
                   {event.image && (
-                    <div className="w-24 h-24 flex-shrink-0">
-                      <img
+                    <div className="relative w-24 h-24 flex-shrink-0">
+                      <Image
                         src={event.image}
                         alt={event.title}
-                        className="w-full h-full object-cover rounded"
+                        fill
+                        sizes="96px"
+                        className="object-cover rounded"
                       />
                     </div>
                   )}

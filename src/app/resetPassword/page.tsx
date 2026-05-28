@@ -1,8 +1,8 @@
 "use client";
 import { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { API_URL } from "@/config/api";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -84,8 +84,8 @@ function ResetPasswordForm() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-4">
-            <a href="/" className="hover:underline">Home</a>
-            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <Link href="/" className="hover:underline">Home</Link>
+            <a href="/search" className="hover:underline">Ver Cadastros</a>
           </nav>
         </div>
       </header>

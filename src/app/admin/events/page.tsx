@@ -1,8 +1,6 @@
 'use client';
 import { useState } from 'react';
-import Image from 'next/image';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { API_URL } from '@/config/api';
 
 export default function EventsCMS() {
   const [formData, setFormData] = useState({
@@ -188,6 +186,7 @@ export default function EventsCMS() {
               {imagePreview && (
                 <div className="mt-4">
                   <p className="text-sm text-gray-600 mb-2">Prévia:</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={imagePreview} alt="Preview" className="max-w-xs h-auto rounded" />
                 </div>
               )}

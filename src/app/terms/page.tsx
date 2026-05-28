@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function TermsOfUse() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -6,8 +8,8 @@ export default function TermsOfUse() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-4">
-            <a href="/" className="hover:underline">Home</a>
-            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <Link href="/" className="hover:underline">Home</Link>
+            <a href="/search" className="hover:underline">Ver Cadastros</a>
           </nav>
         </div>
       </header>
@@ -16,7 +18,7 @@ export default function TermsOfUse() {
       <main className="flex-1 bg-gray-50 py-12 px-4">
         <article className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg p-8 lg:p-12">
           <h1 className="text-4xl font-bold text-[#1e3a8a] mb-4">Termos de Uso</h1>
-          <p className="text-gray-600 mb-8">Última atualização: {new Date().toLocaleDateString('pt-BR')}</p>
+          <p className="text-gray-600 mb-8">Última atualização: 28 de maio de 2026</p>
           
           <div className="prose prose-lg max-w-none text-gray-700">
             <section className="mb-8">
@@ -110,7 +112,7 @@ export default function TermsOfUse() {
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-[#1e3a8a] mb-4">8. Limitação de Responsabilidade</h2>
               <p className="mb-4">
-                O Nós Cultural é fornecido "como está" e "conforme disponível". Não garantimos que:
+                O Nós Cultural é fornecido &quot;como está&quot; e &quot;conforme disponível&quot;. Não garantimos que:
               </p>
               <ul className="list-disc pl-6 mb-4 space-y-2">
                 <li>A plataforma estará sempre disponível ou livre de erros</li>
