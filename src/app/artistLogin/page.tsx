@@ -1,14 +1,13 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-
-// Simula as configurações da API
-const API_ENDPOINTS = {
-  login: "/api/auth/login"
-};
+import { useAuth } from "@/contexts/AuthContext";
+import { API_ENDPOINTS } from "@/config/api";
 
 export default function Login() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,12 +33,15 @@ export default function Login() {
         return;
       }
 
-      // Salvar token e dados do artista
-      localStorage.setItem("authToken", data.token);
-      localStorage.setItem("artistData", JSON.stringify(data.artist));
-
-      // Redirecionar para o dashboard com o ID do artista na URL
-      router.push(`/dashboard/${data.artist.id}`);
+      const artistId = data.artist._id ?? data.artist.id;
+      login(data.token, {
+        _id: artistId,
+        id: artistId,
+        name: data.artist.name,
+        email: data.artist.email,
+        profilePicture: data.artist.profilePicture,
+      });
+      router.push(`/dashboard/${data.artist._id ?? data.artist.id}`);
 
     } catch (err) {
       console.error("Erro no login:", err);
@@ -56,8 +58,8 @@ export default function Login() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-4">
-            <a href="/" className="hover:underline">Home</a>
-            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <Link href="/" className="hover:underline">Home</Link>
+            <a href="/search" className="hover:underline">Ver Cadastros</a>
           </nav>
         </div>
       </header>
@@ -96,7 +98,7 @@ export default function Login() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
                 disabled={loading}
-                onKeyPress={(e) => {
+                onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     handleSubmit(e);
                   }

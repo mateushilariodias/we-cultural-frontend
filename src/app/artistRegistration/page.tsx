@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/config/api";
 
 const categorias = [
   "Arquitetura",
@@ -150,6 +151,7 @@ export default function Cadastro() {
   };
 
   // Atualizar campo individual
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateField = (field: keyof FormData, value: any) => {
     // Aplicar máscara se for o campo de telefone
     if (field === 'phone') {
@@ -307,17 +309,12 @@ export default function Cadastro() {
     }
 
     try {
-      console.log("📤 Enviando cadastro...");
       
-      // Chamar backend diretamente
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      
-      const res = await fetch(`${BACKEND_URL}/api/artists`, {
+      const res = await fetch(`${API_URL}/api/artists`, {
         method: "POST",
         body: submitData,
       });
 
-      console.log("📥 Status:", res.status);
 
       // Verificar se a resposta é JSON
       const contentType = res.headers.get("content-type");
@@ -330,7 +327,6 @@ export default function Cadastro() {
       }
 
       const data = await res.json();
-      console.log("✅ Resposta:", data);
 
       if (res.ok) {
         alert("Cadastro realizado com sucesso! Faça login para continuar.");
@@ -382,6 +378,7 @@ export default function Cadastro() {
               <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 rounded-lg">
                 <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                   {imagePreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

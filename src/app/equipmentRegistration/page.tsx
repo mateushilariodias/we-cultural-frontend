@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/config/api";
 
 const categorias = [
   "Teatro", "Museu", "Biblioteca", "Centro Cultural", 
@@ -155,6 +156,7 @@ export default function EquipmentRegistration() {
     return "✅ Senha forte";
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateField = (field: keyof FormData, value: any) => {
     let formattedValue = value;
 
@@ -304,8 +306,6 @@ export default function EquipmentRegistration() {
     setLoading(true);
 
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      
       const submitData = new FormData();
       submitData.append("name", formData.name);
       submitData.append("cnpj", formData.cnpj);
@@ -330,7 +330,7 @@ export default function EquipmentRegistration() {
         submitData.append("logo", formData.logo);
       }
 
-      const res = await fetch(`${BACKEND_URL}/api/equipments`, {
+      const res = await fetch(`${API_URL}/api/equipments`, {
         method: "POST",
         body: submitData,
       });
@@ -385,6 +385,7 @@ export default function EquipmentRegistration() {
               <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 rounded-lg">
                 <div className="w-32 h-32 rounded-lg bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                   {imagePreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
                     <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

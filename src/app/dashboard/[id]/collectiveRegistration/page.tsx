@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/config/api";
 
 const categorias = [
   "Arquitetura", "Arte digital", "Artesanato", "Cinema", "Dança",
@@ -116,18 +117,19 @@ export default function CollectiveRegistration() {
 
   // Verificar se usuário está logado
   useEffect(() => {
-    const token = localStorage.getItem("authToken");
+    const token = localStorage.getItem("token");
     const artistData = localStorage.getItem("artistData");
-    
+
     if (!token || !artistData) {
       setIsLoggedIn(false);
     } else {
       setIsLoggedIn(true);
     }
-    
+
     setCheckingAuth(false);
   }, []);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateField = (field: keyof FormData, value: any) => {
     let formattedValue = value;
 
@@ -271,8 +273,6 @@ export default function CollectiveRegistration() {
         return;
       }
 
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      
       const submitData = new FormData();
       submitData.append("name", formData.name);
       submitData.append("description", formData.description);
@@ -290,7 +290,7 @@ export default function CollectiveRegistration() {
         submitData.append("profilePicture", formData.profilePicture);
       }
 
-      const res = await fetch(`${BACKEND_URL}/api/collectives`, {
+      const res = await fetch(`${API_URL}/api/collectives`, {
         method: "POST",
         body: submitData,
       });
@@ -368,6 +368,7 @@ export default function CollectiveRegistration() {
             <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 rounded-lg">
               <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                 {imagePreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
                   <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

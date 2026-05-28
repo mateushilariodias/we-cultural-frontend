@@ -1,6 +1,8 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/config/api";
 
 export default function EquipmentLogin() {
   const router = useRouter();
@@ -9,12 +11,10 @@ export default function EquipmentLogin() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doLogin = async () => {
     setLoading(true);
     setError("");
 
-    // Validação básica
     if (!name.trim() || !password.trim()) {
       setError("Nome e senha são obrigatórios");
       setLoading(false);
@@ -22,13 +22,9 @@ export default function EquipmentLogin() {
     }
 
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      
-      const res = await fetch(`${BACKEND_URL}/api/auth/equipment/login`, {
+      const res = await fetch(`${API_URL}/api/auth/equipment/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: name.trim(), password }),
       });
 
@@ -40,18 +36,19 @@ export default function EquipmentLogin() {
         return;
       }
 
-      // ✅ Usar sessionStorage com verificação de window
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         sessionStorage.setItem("equipmentToken", data.token);
-        sessionStorage.setItem("equipmentData", JSON.stringify({
-          id: data.equipment.id,
-          name: data.equipment.name,
-          logo: data.equipment.logo,
-        }));
+        sessionStorage.setItem(
+          "equipmentData",
+          JSON.stringify({
+            id: data.equipment.id,
+            name: data.equipment.name,
+            logo: data.equipment.logo,
+          })
+        );
       }
 
       router.push(`/equipment/${data.equipment.id}`);
-
     } catch (err) {
       console.error("Erro no login:", err);
       setError("Erro ao conectar com o servidor");
@@ -60,14 +57,19 @@ export default function EquipmentLogin() {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await doLogin();
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-purple-700 text-white px-4 lg:px-40 py-3">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-4">
-            <a href="/" className="hover:underline">Home</a>
-            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <Link href="/" className="hover:underline">Home</Link>
+            <a href="/search" className="hover:underline">Ver Cadastros</a>
           </nav>
         </div>
       </header>
@@ -83,14 +85,14 @@ export default function EquipmentLogin() {
             <h1 className="text-3xl font-bold text-purple-700 mb-2">Login de Equipamento</h1>
             <p className="text-gray-600">Acesse o perfil do seu equipamento cultural</p>
           </div>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-4">
               {error}
             </div>
           )}
-          
-          <div className="flex flex-col gap-4">
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
               <label className="font-medium text-gray-700">Nome do Equipamento *</label>
               <input
@@ -103,7 +105,7 @@ export default function EquipmentLogin() {
               />
               <p className="text-xs text-gray-500 mt-1">Digite exatamente como foi cadastrado</p>
             </div>
-            
+
             <div className="flex flex-col gap-1">
               <label className="font-medium text-gray-700">Senha *</label>
               <input
@@ -113,16 +115,11 @@ export default function EquipmentLogin() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-600"
                 disabled={loading}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleSubmit(e as any);
-                  }
-                }}
               />
             </div>
-            
+
             <button
-              onClick={handleSubmit}
+              type="submit"
               className="bg-purple-600 text-white px-4 py-3 rounded hover:bg-purple-700 disabled:opacity-50 transition font-semibold mt-2"
               disabled={loading}
             >
@@ -138,17 +135,17 @@ export default function EquipmentLogin() {
                 "Entrar"
               )}
             </button>
-          </div>
-          
+          </form>
+
           <hr className="my-6 border-gray-300" />
-          
+
           <p className="text-center text-gray-600">
             Não tem um equipamento cadastrado?{" "}
             <a href="/equipmentRegistration" className="text-purple-600 hover:underline font-semibold">
               Cadastre aqui
             </a>
           </p>
-          
+
           <div className="mt-4 bg-blue-50 border border-blue-200 rounded p-3">
             <p className="text-sm text-blue-700 text-center">
               <strong>ℹ️ Acesso independente:</strong> Não é necessário ser artista para cadastrar um equipamento cultural
