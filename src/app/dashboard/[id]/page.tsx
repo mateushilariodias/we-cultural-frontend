@@ -1,22 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  PieChart, Pie, Cell, Tooltip, Legend, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer 
+import { useAuth } from "@/contexts/AuthContext";
+import { API_ENDPOINTS } from "@/config/api";
+import {
+  PieChart, Pie, Cell, Tooltip, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer
 } from "recharts";
+
+interface Artist {
+  id: string;
+  _id?: string;
+  name: string;
+  email: string;
+  profilePicture?: string;
+}
 
 const COLORS = {
   primary: ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'],
   diversity: ['#10B981', '#3B82F6', '#F59E0B', '#EF4444']
 };
-
-interface Artist {
-  id: string;
-  name: string;
-  email: string;
-  profilePicture?: string;
-}
 
 interface Totais {
   totalArtistas: number;
@@ -51,6 +56,7 @@ interface Stats {
 
 export default function Dashboard() {
   const router = useRouter();
+  const { logout } = useAuth();
   const [artist, setArtist] = useState<Artist | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -58,31 +64,24 @@ export default function Dashboard() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
-  // Carregar artista do localStorage
   useEffect(() => {
-    const artistData = localStorage.getItem("artistData");
-    if (artistData) {
+    const cached = localStorage.getItem("artistData");
+    if (cached) {
       try {
-        const parsed = JSON.parse(artistData);
-        setArtist(parsed);
-        console.log("✅ Artista carregado:", parsed);
-      } catch (error) {
-        console.error("❌ Erro ao parsear artistData:", error);
+        setArtist(JSON.parse(cached));
+      } catch {
+        // ignore parse error
       }
-    } else {
-      console.log("⚠️ Nenhum artista logado");
     }
   }, []);
 
-  // Carregar estatísticas
   useEffect(() => {
     const loadStats = async () => {
       try {
-        const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-        const res = await fetch(`${BACKEND_URL}/api/stats`);
-        
+        const res = await fetch(API_ENDPOINTS.stats);
+
         if (!res.ok) throw new Error('Erro ao carregar estatísticas');
-        
+
         const data = await res.json();
         setStats(data);
         setLoading(false);
@@ -97,9 +96,7 @@ export default function Dashboard() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("artistData");
-    setArtist(null);
+    logout();
     router.push("/");
   };
 
@@ -164,11 +161,11 @@ export default function Dashboard() {
       {/* Header */}
       <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-3">
         <div className="flex justify-between items-center">
-          <a href="/" className="text-2xl font-bold hover:opacity-90 transition">Nós Cultural</a>
+          <Link href="/" className="text-2xl font-bold hover:opacity-90 transition">Nós Cultural</Link>
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-6 items-center">
-            <a href="/search" className="hover:underline">Ver Artistas</a>
+            <a href="/search" className="hover:underline">Ver Cadastros</a>
 
             {!artist ? (
               <>
@@ -180,18 +177,19 @@ export default function Dashboard() {
                 </a>
               </>
             ) : (
-              /* Profile Icon - Desktop */
               <div className="relative">
-                <button 
+                <button
                   onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                   className="w-10 h-10 rounded-full border-2 border-white hover:border-[#F59E0B] transition overflow-hidden"
                   title={artist.name}
                 >
                   {artist.profilePicture ? (
-                    <img 
-                      src={artist.profilePicture} 
+                    <Image
+                      src={artist.profilePicture}
                       alt={artist.name}
-                      className="w-full h-full object-cover"
+                      fill
+                      sizes="40px"
+                      className="object-cover"
                     />
                   ) : (
                     <div className="w-full h-full bg-white text-[#1e3a8a] flex items-center justify-center font-bold">
@@ -199,33 +197,33 @@ export default function Dashboard() {
                     </div>
                   )}
                 </button>
-                
+
                 {profileMenuOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white text-gray-800 rounded-lg shadow-lg py-2 z-50">
                     <div className="px-4 py-3 border-b">
                       <p className="font-semibold text-gray-900">{artist.name}</p>
                       <p className="text-sm text-gray-500 truncate">{artist.email}</p>
                     </div>
-                    <a 
-                      href={`/dashboard/${artist.id}/settings`}
+                    <a
+                      href={`/dashboard/${artist.id}/artistSettings`}
                       className="block px-4 py-2 hover:bg-gray-100 transition"
                     >
                       ⚙️ Configurações
                     </a>
-                   <a 
+                    <a
                       href={`/dashboard/${artist.id}/collectiveRegistration`}
                       className="block px-4 py-2 hover:bg-gray-100 transition"
-                      >
-                      📝 Cadastar Coletivo
+                    >
+                      📝 Cadastrar Coletivo
                     </a>
-                    <a 
+                    <a
                       href={`/dashboard/${artist.id}/collectiveLogin`}
                       className="block px-4 py-2 hover:bg-gray-100 transition"
-                      >
+                    >
                       📝 Login de Coletivo
                     </a>
-                    <button 
-                      onClick={handleLogout} 
+                    <button
+                      onClick={handleLogout}
                       className="block w-full text-left px-4 py-2 hover:bg-gray-100 transition"
                     >
                       🚪 Sair
@@ -257,9 +255,11 @@ export default function Dashboard() {
             {artist && (
               <div className="flex items-center gap-3 pb-3 border-b border-white/30">
                 {artist.profilePicture ? (
-                  <img 
-                    src={artist.profilePicture} 
+                  <Image
+                    src={artist.profilePicture}
                     alt={artist.name}
+                    width={48}
+                    height={48}
                     className="w-12 h-12 rounded-full object-cover border-2 border-white"
                   />
                 ) : (
@@ -274,7 +274,7 @@ export default function Dashboard() {
               </div>
             )}
             
-            <a href="/search" className="hover:underline py-2">Ver Artistas</a>
+            <a href="/search" className="hover:underline py-2">Ver Cadastros</a>
             
             {!artist ? (
               <>
@@ -288,7 +288,7 @@ export default function Dashboard() {
             ) : (
               <>
                 <hr className="border-white/30" />
-                <a href={`/dashboard/${artist.id}/settings`} className="hover:underline py-2">⚙️ Configurações</a>
+                <a href={`/dashboard/${artist.id}/artistSettings`} className="hover:underline py-2">⚙️ Configurações</a>
                 <button onClick={handleLogout} className="text-left hover:underline py-2">🚪 Sair</button>
               </>
             )}
@@ -365,7 +365,7 @@ export default function Dashboard() {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {generoData.map((entry, index) => (
+                    {generoData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS.primary[index % COLORS.primary.length]} />
                     ))}
                   </Pie>
@@ -384,7 +384,7 @@ export default function Dashboard() {
                   <YAxis />
                   <Tooltip />
                   <Bar dataKey="quantidade" fill="#1e3a8a">
-                    {faixaEtariaData.map((entry, index) => (
+                    {faixaEtariaData.map((_, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS.primary[index % COLORS.primary.length]} />
                     ))}
                   </Bar>
