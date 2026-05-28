@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/config/api";
 
 interface Artist {
   _id: string;
@@ -73,10 +75,9 @@ export default function ArtistSettings() {
 
   const loadFullArtistData = async (artistId: string) => {
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("token");
 
-      const res = await fetch(`${BACKEND_URL}/api/artists/${artistId}`, {
+      const res = await fetch(`${API_URL}/api/artists/${artistId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -123,12 +124,6 @@ export default function ArtistSettings() {
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("artistData");
-    router.push("/");
-  };
-
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -159,8 +154,7 @@ export default function ArtistSettings() {
     setEditLoading(true);
     
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("token");
       const artistId = artist._id || artist.id;
 
       const submitData = new FormData();
@@ -185,7 +179,7 @@ export default function ArtistSettings() {
         submitData.append("profilePicture", formData.profilePicture);
       }
 
-      const res = await fetch(`${BACKEND_URL}/api/artists/${artistId}`, {
+      const res = await fetch(`${API_URL}/api/artists/${artistId}`, {
         method: "PUT",
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -198,8 +192,10 @@ export default function ArtistSettings() {
         setArtist(updatedData);
         
         // Atualizar localStorage
+        const newId = updatedData._id || updatedData.id;
         localStorage.setItem("artistData", JSON.stringify({
-          id: updatedData._id || updatedData.id,
+          id: newId,
+          _id: newId,
           name: updatedData.name,
           email: updatedData.email,
           profilePicture: updatedData.profilePicture,
@@ -229,11 +225,10 @@ export default function ArtistSettings() {
 
     setDeleteLoading(true);
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
-      const token = localStorage.getItem("authToken");
+      const token = localStorage.getItem("token");
       const artistId = artist._id || artist.id;
 
-      const res = await fetch(`${BACKEND_URL}/api/artists/${artistId}`, {
+      const res = await fetch(`${API_URL}/api/artists/${artistId}`, {
         method: "DELETE",
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -242,7 +237,7 @@ export default function ArtistSettings() {
 
       if (res.ok) {
         alert("✅ Conta excluída com sucesso! Seus dados foram removidos da plataforma.");
-        localStorage.removeItem("authToken");
+        localStorage.removeItem("token");
         localStorage.removeItem("artistData");
         router.push("/");
       } else {
@@ -288,7 +283,7 @@ export default function ArtistSettings() {
       {/* Header */}
       <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-4">
         <div className="flex items-center gap-4">
-          <button onClick={() => router.push("/dashboard")} className="hover:opacity-80 transition">
+          <button onClick={() => router.push(`/dashboard/${artist?._id || artist?.id}`)} className="hover:opacity-80 transition">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -344,9 +339,11 @@ export default function ArtistSettings() {
                   
                   <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8">
                     {artist.profilePicture ? (
-                      <img 
-                        src={artist.profilePicture} 
+                      <Image
+                        src={artist.profilePicture}
                         alt={artist.name}
+                        width={128}
+                        height={128}
                         className="w-32 h-32 rounded-full object-cover border-4 border-[#1e3a8a] shadow-lg"
                       />
                     ) : (
@@ -444,6 +441,7 @@ export default function ArtistSettings() {
                     <div className="flex flex-col items-center gap-4 p-6 bg-gray-50 rounded-lg">
                       <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
                         {imagePreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                         ) : (
                           <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
