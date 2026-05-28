@@ -1,8 +1,5 @@
 'use client';
 
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
-
 export default function CTASection() {
   return (
     <section className="py-20 px-4 lg:px-40 bg-white">

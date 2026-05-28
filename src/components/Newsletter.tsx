@@ -31,7 +31,7 @@ export default function NewsletterSection() {
       } else {
         setStatus('error');
       }
-    } catch (error) {
+    } catch {
       setStatus('error');
     }
   };

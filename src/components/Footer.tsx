@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default function FooterSection() {
@@ -25,7 +24,7 @@ export default function FooterSection() {
           <div>
             <h3 className="font-bold mb-4">Navegação</h3>
             <ul className="space-y-2 text-base text-white text-opacity-80">
-              <li><a href="/search" className="hover:text-yellow-300 transition">Ver Artistas</a></li>
+              <li><a href="/search" className="hover:text-yellow-300 transition">Ver Cadastros</a></li>
               <li><a href="/artistRegistration" className="hover:text-yellow-300 transition">Cadastrar Artista</a></li>
               <li><a href="/artistLogin" className="hover:text-yellow-300 transition">Login de Artista</a></li>
               {/* <li><a href="/blog" className="hover:text-yellow-300 transition">Blog</a></li> */}
@@ -38,7 +37,7 @@ export default function FooterSection() {
             <ul className="space-y-2 text-base text-white text-opacity-80">
               {/* <li><a href="#" className="hover:text-yellow-300 transition">Como Funciona</a></li> */}
               {/* <li><a href="#" className="hover:text-yellow-300 transition">FAQ</a></li> */}
-              <li><a href="artistLogin" className="hover:text-yellow-300 transition">Dashboard</a></li>
+              <li><a href="/artistLogin" className="hover:text-yellow-300 transition">Dashboard</a></li>
               {/* <li><a href="#" className="hover:text-yellow-300 transition">Estatísticas</a></li> */}
             </ul>
           </div>
