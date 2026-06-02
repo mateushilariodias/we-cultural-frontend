@@ -81,6 +81,15 @@ export default function Cadastro() {
     return value;
   };
 
+  // ===== MÁSCARA DE DATA =====
+  const maskDate = (value: string) => {
+    if (!value) return "";
+    value = value.replace(/\D/g, "");
+    value = value.replace(/^(\d{2})(\d)/, "$1/$2");
+    value = value.replace(/^(\d{2}\/\d{2})(\d)/, "$1/$2");
+    return value.slice(0, 10);
+  };
+
   // ===== VALIDAÇÕES =====
   
   // Validar email
@@ -136,9 +145,10 @@ export default function Cadastro() {
     return validTypes.includes(file.type) && file.size <= maxSize;
   };
 
-  // Validar idade (mínimo 16 anos)
+  // Validar idade (mínimo 16 anos) — recebe DD/MM/AAAA
   const isValidAge = (birthDate: string): boolean => {
-    const birth = new Date(birthDate);
+    const [day, month, year] = birthDate.split('/').map(Number);
+    const birth = new Date(year, month - 1, day);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
@@ -153,9 +163,12 @@ export default function Cadastro() {
   // Atualizar campo individual
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateField = (field: keyof FormData, value: any) => {
-    // Aplicar máscara se for o campo de telefone
+    // Aplicar máscara se for o campo de telefone ou data
     if (field === 'phone') {
       value = maskPhone(value);
+    }
+    if (field === 'birthDate') {
+      value = maskDate(value);
     }
 
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -213,6 +226,8 @@ export default function Cadastro() {
       }
       if (!formData.birthDate) {
         newErrors.birthDate = "Data de nascimento é obrigatória";
+      } else if (formData.birthDate.length < 10) {
+        newErrors.birthDate = "Data inválida. Use o formato DD/MM/AAAA";
       } else if (!isValidAge(formData.birthDate)) {
         newErrors.birthDate = "Você deve ter no mínimo 16 anos";
       }
@@ -285,7 +300,8 @@ export default function Cadastro() {
     
     // Adicionar dados simples
     submitData.append("name", formData.name);
-    submitData.append("birthDate", formData.birthDate);
+    const [bDay, bMonth, bYear] = formData.birthDate.split('/');
+    submitData.append("birthDate", `${bYear}-${bMonth}-${bDay}`);
     submitData.append("email", formData.email);
     submitData.append("phone", formData.phone);
     submitData.append("password", formData.password);
@@ -421,9 +437,12 @@ export default function Cadastro() {
               <div>
                 <label className="block font-semibold text-gray-700 mb-2">Data de Nascimento * (Mínimo 16 anos)</label>
                 <input
-                  type="date"
+                  type="text"
                   value={formData.birthDate}
                   onChange={(e) => updateField('birthDate', e.target.value)}
+                  placeholder="DD/MM/AAAA"
+                  maxLength={10}
+                  inputMode="numeric"
                   className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] ${errors.birthDate ? 'border-red-500' : 'border-gray-300'}`}
                   required
                 />

@@ -24,6 +24,14 @@ interface Artist {
   socialLink?: string;
 }
 
+const maskDate = (value: string) => {
+  if (!value) return "";
+  value = value.replace(/\D/g, "");
+  value = value.replace(/^(\d{2})(\d)/, "$1/$2");
+  value = value.replace(/^(\d{2}\/\d{2})(\d)/, "$1/$2");
+  return value.slice(0, 10);
+};
+
 export default function ArtistSettings() {
   const router = useRouter();
   const [artist, setArtist] = useState<Artist | null>(null);
@@ -95,7 +103,7 @@ export default function ArtistSettings() {
         name: data.name || "",
         email: data.email || "",
         phone: data.phone || "",
-        birthDate: data.birthDate ? data.birthDate.split('T')[0] : "",
+        birthDate: data.birthDate ? (() => { const [y, m, d] = data.birthDate.split('T')[0].split('-'); return `${d}/${m}/${y}`; })() : "",
         gender: data.gender || "",
         lgbtqiapn: data.lgbtqiapn || false,
         black: data.black || false,
@@ -161,7 +169,8 @@ export default function ArtistSettings() {
       submitData.append("name", formData.name);
       submitData.append("email", formData.email);
       submitData.append("phone", formData.phone);
-      submitData.append("birthDate", formData.birthDate);
+      const [bDay, bMonth, bYear] = formData.birthDate.split('/');
+      submitData.append("birthDate", `${bYear}-${bMonth}-${bDay}`);
       submitData.append("gender", formData.gender);
       submitData.append("lgbtqiapn", String(formData.lgbtqiapn));
       submitData.append("black", String(formData.black));
@@ -503,9 +512,12 @@ export default function ArtistSettings() {
                     <div>
                       <label className="block font-semibold text-gray-700 mb-2">Data de Nascimento *</label>
                       <input
-                        type="date"
+                        type="text"
                         value={formData.birthDate}
-                        onChange={(e) => setFormData(prev => ({ ...prev, birthDate: e.target.value }))}
+                        onChange={(e) => setFormData(prev => ({ ...prev, birthDate: maskDate(e.target.value) }))}
+                        placeholder="DD/MM/AAAA"
+                        maxLength={10}
+                        inputMode="numeric"
                         className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]"
                         required
                       />
