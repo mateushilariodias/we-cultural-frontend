@@ -1,71 +1,120 @@
-"use client";
-
-import { use, useEffect, useState } from "react";
+import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { API_ENDPOINTS } from "@/config/api";
+import Breadcrumb from "@/components/Breadcrumb";
+import ArtistCard from "@/components/cards/ArtistCard";
+import { fetchAllArtists } from "@/lib/fetchData";
+import type { Artist } from "@/types";
 
-interface Artist {
-  _id: string;
-  name: string;
-  email: string;
-  phone: string;
-  gender: string;
-  profilePicture?: string;
-  categories?: string[];
-  lgbtqiapn?: boolean;
-  black?: boolean;
-  indigenous?: boolean;
-  pcd?: boolean;
-  portfolioLink?: string;
-  resumeLink?: string;
-  socialLink?: string;
+async function getArtist(id: string): Promise<Artist | null> {
+  try {
+    const res = await fetch(API_ENDPOINTS.artistById(id), {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
-export default function ArtistProfile({ 
-  params 
-}: { 
-  params: Promise<{ id: string }> 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const artist = await getArtist(id);
+
+  if (!artist) {
+    return { title: "Artista não encontrado" };
+  }
+
+  const categories = artist.categories?.join(", ");
+  return {
+    title: `${artist.name} — Artista em Franca, SP`,
+    description: `Conheça o perfil de ${artist.name}${
+      categories ? `, artista de ${categories}` : ""
+    }, na plataforma Nós Cultural de Franca.`,
+    alternates: { canonical: `/artista/${id}` },
+  };
+}
+
+export default async function ArtistProfile({
+  params,
+}: {
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  const [artist, setArtist] = useState<Artist | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { id } = await params;
+  const [artist, allArtists] = await Promise.all([
+    getArtist(id),
+    fetchAllArtists(),
+  ]);
 
-  useEffect(() => {
-    async function fetchArtist() {
-      try {
-        const res = await fetch(API_ENDPOINTS.artistById(id));
-        const data = await res.json();
-        setArtist(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
+  if (!artist) {
+    return <p className="p-6 text-xl text-red-500">Artista não encontrado.</p>;
+  }
 
-    fetchArtist();
-  }, [id]);
+  const related = allArtists
+    .filter(
+      (a) =>
+        a._id !== id &&
+        a.categories?.some((c) => artist.categories?.includes(c))
+    )
+    .slice(0, 4);
 
-  if (loading) return <p className="p-6 text-xl text-[#1e3a8a]">Carregando...</p>;
-  if (!artist) return <p className="p-6 text-xl text-red-500">Artista não encontrado.</p>;
+  const sameAs = [artist.socialLink, artist.portfolioLink].filter(Boolean);
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: artist.name,
+    url: `https://we-cultural-frontend.vercel.app/artista/${id}`,
+    ...(artist.profilePicture && { image: artist.profilePicture }),
+    ...(artist.email && { email: `mailto:${artist.email}` }),
+    ...(artist.phone && { telephone: artist.phone }),
+    ...(artist.categories?.[0] && { jobTitle: artist.categories[0] }),
+    ...(sameAs.length && { sameAs }),
+    workLocation: {
+      "@type": "Place",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Franca",
+        addressRegion: "SP",
+        addressCountry: "BR",
+      },
+    },
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
       {/* Header */}
       <header className="bg-[#1e3a8a] text-white px-4 lg:px-40 py-4">
         <div className="flex items-center gap-4">
-          <a href="/search" className="hover:opacity-80 transition">
+          <Link href="/busca" className="hover:opacity-80 transition">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-          </a>
-          <h1 className="text-xl font-bold">Perfil do Artista</h1>
+          </Link>
+          <span className="text-xl font-bold">Perfil do Artista</span>
         </div>
       </header>
 
+      <Breadcrumb
+        items={[
+          { label: "Início", href: "/" },
+          { label: "Busca", href: "/busca" },
+          { label: artist.name },
+        ]}
+      />
+
       <div className="px-4 lg:px-40 py-6 lg:py-10">
         <div className="max-w-3xl mx-auto bg-white p-4 lg:p-6 rounded-xl shadow-lg">
-          {/* Profile Header - Mobile Friendly */}
+          {/* Profile Header */}
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6">
             {artist.profilePicture ? (
               <Image
@@ -82,8 +131,10 @@ export default function ArtistProfile({
             )}
 
             <div className="flex-1 text-center sm:text-left w-full">
-              <h1 className="text-2xl lg:text-3xl font-bold text-[#1e3a8a] mb-3">{artist.name}</h1>
-              
+              <h1 className="text-2xl lg:text-3xl font-bold text-[#1e3a8a] mb-3">
+                {artist.name}
+              </h1>
+
               <div className="space-y-2 text-sm lg:text-base">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                   <strong className="text-gray-700">Email:</strong>
@@ -167,12 +218,12 @@ export default function ArtistProfile({
           {/* Links */}
           <div className="space-y-4">
             <h2 className="text-xl lg:text-2xl font-semibold text-[#1e3a8a] mb-3">Links</h2>
-            
+
             {artist.portfolioLink && (
-              <a 
-                href={artist.portfolioLink} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href={artist.portfolioLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition group"
               >
                 <div className="w-10 h-10 bg-[#1e3a8a] rounded-full flex items-center justify-center text-white group-hover:scale-110 transition">
@@ -191,10 +242,10 @@ export default function ArtistProfile({
             )}
 
             {artist.resumeLink && (
-              <a 
-                href={artist.resumeLink} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href={artist.resumeLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition group"
               >
                 <div className="w-10 h-10 bg-[#10B981] rounded-full flex items-center justify-center text-white group-hover:scale-110 transition">
@@ -213,10 +264,10 @@ export default function ArtistProfile({
             )}
 
             {artist.socialLink && (
-              <a 
-                href={artist.socialLink} 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href={artist.socialLink}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex items-center gap-3 p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition group"
               >
                 <div className="w-10 h-10 bg-[#F59E0B] rounded-full flex items-center justify-center text-white group-hover:scale-110 transition">
@@ -236,6 +287,29 @@ export default function ArtistProfile({
           </div>
         </div>
       </div>
+
+      {related.length > 0 && (
+        <section className="px-4 lg:px-40 pb-12">
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-xl font-bold text-[#1e3a8a] mb-4">
+              Artistas Relacionados em Franca, SP
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {related.map((a) => (
+                <ArtistCard key={a._id} artist={a} />
+              ))}
+            </div>
+            <div className="mt-5 text-center">
+              <Link
+                href={`/busca?category=${encodeURIComponent(artist.categories?.[0] ?? "")}`}
+                className="text-sm text-[#1e3a8a] hover:underline font-semibold"
+              >
+                Ver todos os artistas de {artist.categories?.[0]} →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

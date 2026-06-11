@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default function FooterSection() {
@@ -10,7 +11,7 @@ export default function FooterSection() {
       <div className="max-w-7xl mx-auto">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           
           {/* Brand */}
           <div>
@@ -20,25 +21,35 @@ export default function FooterSection() {
             </p>
           </div>
 
-          {/* Quick Links */}
+          {/* Explorar */}
           <div>
-            <h3 className="font-bold mb-4">Navegação</h3>
+            <h3 className="font-bold mb-4">Explorar</h3>
             <ul className="space-y-2 text-base text-white text-opacity-80">
-              <li><a href="/search" className="hover:text-yellow-300 transition">Ver Cadastros</a></li>
-              <li><a href="/artistRegistration" className="hover:text-yellow-300 transition">Cadastrar Artista</a></li>
-              <li><a href="/artistLogin" className="hover:text-yellow-300 transition">Login de Artista</a></li>
-              {/* <li><a href="/blog" className="hover:text-yellow-300 transition">Blog</a></li> */}
+              <li><Link href="/busca" className="hover:text-yellow-300 transition">Ver Cadastros</Link></li>
+              <li><Link href="/artistas-de-franca" className="hover:text-yellow-300 transition">Artistas de Franca</Link></li>
+              <li><Link href="/cultura-franca" className="hover:text-yellow-300 transition">Cultura de Franca</Link></li>
+              <li><Link href="/agenda" className="hover:text-yellow-300 transition">Agenda Cultural</Link></li>
             </ul>
           </div>
 
-          {/* Resources */}
+          {/* Participe */}
+          <div>
+            <h3 className="font-bold mb-4">Participe</h3>
+            <ul className="space-y-2 text-base text-white text-opacity-80">
+              <li><Link href="/cadastro-de-artista" className="hover:text-yellow-300 transition">Cadastrar Artista</Link></li>
+              <li><Link href="/entrar" className="hover:text-yellow-300 transition">Login de Artista</Link></li>
+              <li><Link href="/cadastro-de-espaco" className="hover:text-yellow-300 transition">Cadastrar Espaço</Link></li>
+              <li><Link href="/entrar-espaco" className="hover:text-yellow-300 transition">Login de Espaço</Link></li>
+            </ul>
+          </div>
+
+          {/* Recursos */}
           <div>
             <h3 className="font-bold mb-4">Recursos</h3>
             <ul className="space-y-2 text-base text-white text-opacity-80">
-              {/* <li><a href="#" className="hover:text-yellow-300 transition">Como Funciona</a></li> */}
-              {/* <li><a href="#" className="hover:text-yellow-300 transition">FAQ</a></li> */}
-              <li><a href="/artistLogin" className="hover:text-yellow-300 transition">Dashboard</a></li>
-              {/* <li><a href="#" className="hover:text-yellow-300 transition">Estatísticas</a></li> */}
+              <li><Link href="/como-funciona" className="hover:text-yellow-300 transition">Como Funciona</Link></li>
+              <li><Link href="/cenario-cultural" className="hover:text-yellow-300 transition">Cenário Cultural</Link></li>
+              <li><Link href="/perguntas-frequentes" className="hover:text-yellow-300 transition">Perguntas Frequentes</Link></li>
             </ul>
           </div>
 
@@ -69,9 +80,8 @@ export default function FooterSection() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-white text-opacity-80">
           <p>© {currentYear} <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
           <div className="flex gap-6">
-            <a href="/privacy" className="hover:text-yellow-300 transition">Privacidade</a>
-            <a href="/terms" className="hover:text-yellow-300 transition">Termos</a>
-            {/* <a href="/lgpd" className="hover:text-yellow-300 transition">LGPD</a> */}
+            <Link href="/privacidade" className="hover:text-yellow-300 transition">Privacidade</Link>
+            <Link href="/termos" className="hover:text-yellow-300 transition">Termos</Link>
           </div>
         </div>
       </div>

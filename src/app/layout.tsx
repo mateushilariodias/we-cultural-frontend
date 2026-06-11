@@ -15,8 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nós Cultural",
-  description: "Nós Inseridos na Cultura de Franca",
+  metadataBase: new URL("https://we-cultural-frontend.vercel.app"),
+  title: {
+    template: "%s | Nós Cultural",
+    default: "Nós Cultural — Artistas e Cultura de Franca, SP",
+  },
+  description:
+    "Plataforma gratuita que conecta artistas, coletivos e espaços culturais de Franca, SP.",
 };
 
 export default function RootLayout({

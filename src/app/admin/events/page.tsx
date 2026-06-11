@@ -131,7 +131,7 @@ export default function EventsCMS() {
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Nós Cultural - Admin</h1>
           <nav className="flex gap-4">
-            <a href="/schedule" className="hover:underline">Ver Programação</a>
+            <a href="/agenda" className="hover:underline">Ver Programação</a>
           </nav>
         </div>
       </header>

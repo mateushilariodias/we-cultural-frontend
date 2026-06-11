@@ -11,10 +11,11 @@ export default function AboutSection() {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-4xl font-bold text-bluePrimary mb-6">
-            Sobre a Nós Cultural
+            Sobre a Nós Cultural — Plataforma Cultural de Franca, SP
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            A plataforma que conecta artistas, coletivos e espaços culturais de Franca em um único lugar.
+            A plataforma cultural gratuita que conecta artistas de Franca, SP, coletivos culturais
+            e espaços como galerias de arte, teatros e estúdios em um único lugar.
           </p>
         </div>
 
@@ -62,23 +63,23 @@ export default function AboutSection() {
             {[
               {
                 icon: Users,
-                title: 'Artistas',
-                description: 'Cadastre seu perfil, mostre suas obras e conecte-se com outros profissionais.'
+                title: 'Artistas de Franca',
+                description: 'Músicos, atores, dançarinos, fotógrafos e artistas de todas as áreas cadastram perfil e ganham visibilidade em Franca, SP.'
               },
               {
                 icon: Target,
-                title: 'Coletivos',
-                description: 'Artistas podem formar coletivos para projetos e iniciativas em grupo.'
+                title: 'Coletivos Culturais',
+                description: 'Artistas formam coletivos culturais para projetos colaborativos, ampliando o alcance e as oportunidades.'
               },
               {
                 icon: Network,
                 title: 'Espaços Culturais',
-                description: 'Estúdios, galerias, teatros e outros espaços ganham visibilidade.'
+                description: 'Galerias de arte, teatros, estúdios e outros espaços culturais de Franca ganham visibilidade e se conectam com artistas.'
               },
               {
                 icon: Search,
                 title: 'Descoberta Fácil',
-                description: 'Busque por categoria, veja estatísticas e encontre colaboradores.'
+                description: 'Busque artistas e espaços por categoria — música, teatro, dança, cinema e mais — e encontre colaboradores em Franca.'
               }
             ].map((feature, index) => {
               const Icon = feature.icon;
@@ -126,13 +127,13 @@ export default function AboutSection() {
               },
               {
                 number: '02',
-                title: 'Formar Coletivos',
-                description: 'Artistas podem criar ou participar de coletivos para trabalhos em grupo, compartilhando visibilidade e oportunidades.'
+                title: 'Formar Coletivos Culturais',
+                description: 'Artistas de Franca podem criar ou participar de coletivos culturais para projetos em grupo, ampliando visibilidade e oportunidades.'
               },
               {
                 number: '03',
                 title: 'Registrar Espaços',
-                description: 'Estúdios, galerias e teatros se registram (mesmo sem ser artistas) para ganhar visibilidade e conectar com profissionais.'
+                description: 'Galerias de arte, teatros, estúdios e outros espaços culturais de Franca se cadastram para ganhar visibilidade e se conectar com artistas.'
               }
             ].map((step, index) => (
               <div key={index} className="relative">

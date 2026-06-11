@@ -40,11 +40,11 @@ export default function CategoriesSection() {
         {/* Header */}
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold text-bluePrimary mb-4">
-            Categorias Artísticas
+            Categorias Artísticas em Franca, SP
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-            Explore todas as formas de arte e cultura cadastradas na plataforma. 
-            Encontre artistas, coletivos e espaços nas áreas que você se interessa.
+            Explore artistas de música, teatro, dança, cinema, fotografia e outras linguagens
+            culturais de Franca, SP. Encontre coletivos e espaços culturais por categoria.
           </p>
         </div>
 
@@ -55,7 +55,7 @@ export default function CategoriesSection() {
             return (
               <a
                 key={category.id}
-                href={`/search?category=${category.id}`}
+                href={`/busca?category=${category.id}`}
                 className="group flex flex-col items-center justify-center p-4 rounded-lg border-2 border-gray-200 bg-white hover:border-bluePrimary hover:bg-blue-50 transition-all duration-300 cursor-pointer"
               >
                 <Icon className="w-8 h-8 text-bluePrimary mb-3 group-hover:scale-110 transition-transform" />
@@ -73,7 +73,7 @@ export default function CategoriesSection() {
             Quer adicionar sua categoria? Cadastre-se e faça parte do nosso ecossistema.
           </p>
           <a
-            href="/artistRegistration"
+            href="/cadastro-de-artista"
             className="inline-block px-8 py-3 bg-greenPrimary text-white font-semibold rounded hover:bg-opacity-90 transition"
           >
             Cadastrar Agora

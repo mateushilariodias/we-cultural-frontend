@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import Footer from "@/components/Footer";
+
+export const metadata: Metadata = {
+  title: "Termos de Uso",
+  description: "Leia os termos de uso da plataforma Nós Cultural e saiba seus direitos e responsabilidades.",
+  alternates: { canonical: "/termos" },
+};
 
 export default function TermsOfUse() {
   return (
@@ -9,7 +17,7 @@ export default function TermsOfUse() {
           <h1 className="text-2xl font-bold">Nós Cultural</h1>
           <nav className="flex gap-4">
             <Link href="/" className="hover:underline">Home</Link>
-            <a href="/search" className="hover:underline">Ver Cadastros</a>
+            <a href="/busca" className="hover:underline">Ver Cadastros</a>
           </nav>
         </div>
       </header>
@@ -198,17 +206,7 @@ export default function TermsOfUse() {
         </article>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-[#1e3a8a] text-white text-center p-6">
-        <div className="max-w-4xl mx-auto">
-          <p className="mb-2">© 2026 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
-          <div className="flex justify-center gap-4 text-sm">
-            <a href="/privacy" className="hover:underline">Política de Privacidade</a>
-            <span>•</span>
-            <a href="/terms" className="hover:underline">Termos de Uso</a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

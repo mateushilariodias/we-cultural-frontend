@@ -21,9 +21,9 @@ export default function CTASection() {
               {/* Quick Links */}
               <div className="space-y-3 pt-4 text-center">
                 {[
-                  { label: 'Sou Artista', href: '/artistRegistration', icon: true },
-                  { label: 'Tenho um Espaço Cultural', href: '/equipmentRegistration', icon: true },
-                  { label: 'Quero Conhecer Artistas', href: '/search', icon: false }
+                  { label: 'Sou Artista', href: '/cadastro-de-artista', icon: true },
+                  { label: 'Tenho um Espaço Cultural', href: '/cadastro-de-espaco', icon: true },
+                  { label: 'Quero Conhecer Artistas', href: '/busca', icon: false }
                 ].map((link, index) => (
                   <a
                     key={index}

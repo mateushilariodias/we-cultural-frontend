@@ -31,22 +31,22 @@ export default function Header() {
 
       {/* Menu desktop */}
       <nav className="hidden md:flex gap-6 items-center">
-        <a href="/search" className="hover:underline">Ver Cadastros</a>
+        <a href="/busca" className="hover:underline">Ver Cadastros</a>
 
         {!mounted ? null : loading ? (
           <div className="w-10 h-10 rounded-full border-2 border-white/40 animate-pulse bg-white/10" />
         ) : !artist ? (
           <>
-            <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
+            <a href="/cadastro-de-artista" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
               Cadastrar Artista
             </a>
-            <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
+            <a href="/entrar" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
               Login de Artista
             </a>
-            <a href="/equipmentRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
+            <a href="/cadastro-de-espaco" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600">
               Cadastrar Espaço
             </a>
-            <a href="/equipmentLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
+            <a href="/entrar-espaco" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black">
               Login de Espaço
             </a>
           </>
@@ -79,25 +79,25 @@ export default function Header() {
                   <p className="text-sm text-gray-500 truncate">{artist.email}</p>
                 </div>
                 <a
-                  href={`/dashboard/${artist._id}`}
+                  href={`/painel/${artist._id}`}
                   className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 transition"
                 >
                   <UserCircle size={16} /> Dashboard
                 </a>
                 <a
-                  href={`/dashboard/${artist._id}/artistSettings`}
+                  href={`/painel/${artist._id}/configuracoes-artista`}
                   className="block px-4 py-2 hover:bg-gray-100 transition"
                 >
                   ⚙️ Configurações
                 </a>
                 <a
-                  href={`/dashboard/${artist._id}/collectiveRegistration`}
+                  href={`/painel/${artist._id}/cadastro-coletivo`}
                   className="block px-4 py-2 hover:bg-gray-100 transition"
                 >
                   📝 Cadastrar Coletivo
                 </a>
                 <a
-                  href={`/dashboard/${artist._id}/collectiveLogin`}
+                  href={`/painel/${artist._id}/login-coletivo`}
                   className="block px-4 py-2 hover:bg-gray-100 transition"
                 >
                   📝 Login de Coletivo
@@ -147,31 +147,31 @@ export default function Header() {
             </div>
           )}
 
-          <a href="/search" className="hover:underline">Ver Cadastros</a>
+          <a href="/busca" className="hover:underline">Ver Cadastros</a>
 
           {!mounted ? null : loading ? (
             <div className="h-8 w-32 rounded bg-white/10 animate-pulse" />
           ) : !artist ? (
             <>
-              <a href="/artistRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600 text-center">
+              <a href="/cadastro-de-artista" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600 text-center">
                 Cadastrar Artista
               </a>
-              <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black text-center">
+              <a href="/entrar" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black text-center">
                 Login de Artista
               </a>
-              <a href="/equipmentRegistration" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600 text-center">
+              <a href="/cadastro-de-espaco" className="bg-yellow-500 px-4 py-2 rounded hover:bg-yellow-600 text-center">
                 Cadastrar Espaço
               </a>
-              <a href="/equipmentLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black text-center">
+              <a href="/entrar-espaco" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-black text-center">
                 Login de Espaço
               </a>
             </>
           ) : (
             <>
-              <a href={`/dashboard/${artist._id}`} className="hover:underline">Dashboard</a>
-              <a href={`/dashboard/${artist._id}/artistSettings`} className="hover:underline">⚙️ Configurações</a>
-              <a href={`/dashboard/${artist._id}/collectiveRegistration`} className="hover:underline">📝 Cadastrar Coletivo</a>
-              <a href={`/dashboard/${artist._id}/collectiveLogin`} className="hover:underline">📝 Login de Coletivo</a>
+              <a href={`/painel/${artist._id}`} className="hover:underline">Dashboard</a>
+              <a href={`/painel/${artist._id}/configuracoes-artista`} className="hover:underline">⚙️ Configurações</a>
+              <a href={`/painel/${artist._id}/cadastro-coletivo`} className="hover:underline">📝 Cadastrar Coletivo</a>
+              <a href={`/painel/${artist._id}/login-coletivo`} className="hover:underline">📝 Login de Coletivo</a>
               <button onClick={handleLogout} className="text-left hover:underline">🚪 Sair</button>
             </>
           )}

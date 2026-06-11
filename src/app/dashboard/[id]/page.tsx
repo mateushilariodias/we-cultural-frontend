@@ -165,14 +165,14 @@ export default function Dashboard() {
           
           {/* Desktop Navigation */}
           <nav className="hidden md:flex gap-6 items-center">
-            <a href="/search" className="hover:underline">Ver Cadastros</a>
+            <a href="/busca" className="hover:underline">Ver Cadastros</a>
 
             {!artist ? (
               <>
-                <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
+                <a href="/cadastro-de-artista" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition">
                   Cadastrar Artista
                 </a>
-                <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition">
+                <a href="/entrar" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition">
                   Login de Artista
                 </a>
               </>
@@ -205,19 +205,19 @@ export default function Dashboard() {
                       <p className="text-sm text-gray-500 truncate">{artist.email}</p>
                     </div>
                     <a
-                      href={`/dashboard/${artist.id}/artistSettings`}
+                      href={`/painel/${artist.id}/configuracoes-artista`}
                       className="block px-4 py-2 hover:bg-gray-100 transition"
                     >
                       ⚙️ Configurações
                     </a>
                     <a
-                      href={`/dashboard/${artist.id}/collectiveRegistration`}
+                      href={`/painel/${artist.id}/cadastro-coletivo`}
                       className="block px-4 py-2 hover:bg-gray-100 transition"
                     >
                       📝 Cadastrar Coletivo
                     </a>
                     <a
-                      href={`/dashboard/${artist.id}/collectiveLogin`}
+                      href={`/painel/${artist.id}/login-coletivo`}
                       className="block px-4 py-2 hover:bg-gray-100 transition"
                     >
                       📝 Login de Coletivo
@@ -274,21 +274,21 @@ export default function Dashboard() {
               </div>
             )}
             
-            <a href="/search" className="hover:underline py-2">Ver Cadastros</a>
+            <a href="/busca" className="hover:underline py-2">Ver Cadastros</a>
             
             {!artist ? (
               <>
-                <a href="/artistRegistration" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition text-center">
+                <a href="/cadastro-de-artista" className="bg-[#F59E0B] px-4 py-2 rounded hover:bg-[#D97706] transition text-center">
                   Cadastrar Artista
                 </a>
-                <a href="/artistLogin" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition text-center">
+                <a href="/entrar" className="border border-white px-4 py-2 rounded hover:bg-white hover:text-[#1e3a8a] transition text-center">
                   Login de Artista
                 </a>
               </>
             ) : (
               <>
                 <hr className="border-white/30" />
-                <a href={`/dashboard/${artist.id}/artistSettings`} className="hover:underline py-2">⚙️ Configurações</a>
+                <a href={`/painel/${artist.id}/configuracoes-artista`} className="hover:underline py-2">⚙️ Configurações</a>
                 <button onClick={handleLogout} className="text-left hover:underline py-2">🚪 Sair</button>
               </>
             )}

@@ -21,7 +21,7 @@ export default function BlogSection() {
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <a
-                href="/schedule"
+                href="/agenda"
                 className="px-6 py-3 bg-[#1e3a8a] text-white font-semibold rounded hover:opacity-90 transition"
               >
                 Ver Programação Cultural da Semana

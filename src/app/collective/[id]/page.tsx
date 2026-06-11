@@ -1,8 +1,9 @@
-"use client";
-
-import { use, useEffect, useState } from "react";
+import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { API_ENDPOINTS } from "@/config/api";
+import Breadcrumb from "@/components/Breadcrumb";
+import Footer from "@/components/Footer";
 
 interface Collective {
   _id: string;
@@ -16,46 +17,97 @@ interface Collective {
   description?: string;
 }
 
-export default function CollectiveProfile({
+async function getCollective(id: string): Promise<Collective | null> {
+  try {
+    const res = await fetch(API_ENDPOINTS.collectiveById(id), {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const collective = await getCollective(id);
+
+  if (!collective) {
+    return { title: "Coletivo não encontrado" };
+  }
+
+  const categories = collective.categories?.join(", ");
+  const descSnippet = collective.description
+    ? ` ${collective.description.slice(0, 100).trimEnd()}…`
+    : "";
+  return {
+    title: `${collective.name} — Coletivo Cultural em Franca, SP`,
+    description: `Conheça o coletivo ${collective.name}${
+      categories ? `, atuando em ${categories}` : ""
+    }${descSnippet}. Cadastrado no Nós Cultural de Franca.`,
+    alternates: { canonical: `/coletivo/${id}` },
+  };
+}
+
+export default async function CollectiveProfile({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  const [collective, setCollective] = useState<Collective | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { id } = await params;
+  const collective = await getCollective(id);
 
-  useEffect(() => {
-    async function fetchCollective() {
-      try {
-        const res = await fetch(API_ENDPOINTS.collectiveById(id));
-        const data = await res.json();
-        setCollective(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchCollective();
-  }, [id]);
+  if (!collective) {
+    return <p className="p-6 text-xl text-red-500">Coletivo não encontrado.</p>;
+  }
 
-  if (loading) return <p className="p-6 text-xl text-[#1e3a8a]">Carregando...</p>;
-  if (!collective) return <p className="p-6 text-xl text-red-500">Coletivo não encontrado.</p>;
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: collective.name,
+    url: `https://we-cultural-frontend.vercel.app/coletivo/${id}`,
+    ...(collective.profilePicture && { logo: collective.profilePicture }),
+    ...(collective.phone && { telephone: collective.phone }),
+    ...(collective.description && { description: collective.description }),
+    ...(collective.socialLink && { sameAs: [collective.socialLink] }),
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Franca",
+      addressRegion: "SP",
+      addressCountry: "BR",
+    },
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+      />
       {/* Header */}
       <header className="bg-[#7c3aed] text-white px-4 lg:px-40 py-4">
         <div className="flex items-center gap-4">
-          <a href="/search" className="hover:opacity-80 transition">
+          <Link href="/busca" className="hover:opacity-80 transition">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-          </a>
-          <h1 className="text-xl font-bold">Perfil do Coletivo</h1>
+          </Link>
+          <span className="text-xl font-bold">Perfil do Coletivo</span>
         </div>
       </header>
+
+      <Breadcrumb
+        items={[
+          { label: "Início", href: "/" },
+          { label: "Busca", href: "/busca" },
+          { label: collective.name },
+        ]}
+      />
 
       <div className="px-4 lg:px-40 py-6 lg:py-10">
         <div className="max-w-3xl mx-auto bg-white p-4 lg:p-6 rounded-xl shadow-lg">
@@ -172,17 +224,10 @@ export default function CollectiveProfile({
               </a>
             </div>
           )}
-
         </div>
       </div>
 
-      <footer className="bg-[#7c3aed] text-white text-center p-6 mt-20">
-        <p>© 2026 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
-        <div className="flex justify-center gap-6 mt-4 text-sm">
-          <a href="/privacy" className="hover:underline">Política de Privacidade</a>
-          <a href="/terms" className="hover:underline">Termos de Uso</a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

@@ -1,8 +1,9 @@
-"use client";
-
-import { use, useEffect, useState } from "react";
+import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { API_ENDPOINTS } from "@/config/api";
+import Breadcrumb from "@/components/Breadcrumb";
+import Footer from "@/components/Footer";
 
 interface Equipment {
   _id: string;
@@ -23,32 +24,52 @@ interface Equipment {
   logo?: string;
 }
 
-export default function EquipmentProfile({
+async function getEquipment(id: string): Promise<Equipment | null> {
+  try {
+    const res = await fetch(API_ENDPOINTS.equipmentById(id), {
+      next: { revalidate: 3600 },
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const equipment = await getEquipment(id);
+
+  if (!equipment) {
+    return { title: "Espaço não encontrado" };
+  }
+
+  const cidade = equipment.cidade || "Franca";
+  const descSnippet = equipment.description
+    ? ` ${equipment.description.slice(0, 100).trimEnd()}…`
+    : "";
+  return {
+    title: `${equipment.name} — Espaço Cultural em ${cidade}, SP`,
+    description: `Conheça o espaço cultural ${equipment.name} em ${[equipment.bairro, cidade].filter(Boolean).join(", ")}${descSnippet}. Cadastrado no Nós Cultural.`,
+    alternates: { canonical: `/espaco/${id}` },
+  };
+}
+
+export default async function EquipmentProfile({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = use(params);
-  const [equipment, setEquipment] = useState<Equipment | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { id } = await params;
+  const equipment = await getEquipment(id);
 
-  useEffect(() => {
-    async function fetchEquipment() {
-      try {
-        const res = await fetch(API_ENDPOINTS.equipmentById(id));
-        const data = await res.json();
-        setEquipment(data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchEquipment();
-  }, [id]);
-
-  if (loading) return <p className="p-6 text-xl text-[#059669]">Carregando...</p>;
-  if (!equipment) return <p className="p-6 text-xl text-red-500">Espaço não encontrado.</p>;
+  if (!equipment) {
+    return <p className="p-6 text-xl text-red-500">Espaço não encontrado.</p>;
+  }
 
   const enderecoCompleto = [
     equipment.rua,
@@ -60,19 +81,52 @@ export default function EquipmentProfile({
     .filter(Boolean)
     .join(", ");
 
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: equipment.name,
+    url: `https://we-cultural-frontend.vercel.app/espaco/${id}`,
+    ...(equipment.logo && { image: equipment.logo }),
+    ...(equipment.email && { email: equipment.email }),
+    ...(equipment.phone && { telephone: equipment.phone }),
+    ...(equipment.website && { sameAs: [equipment.website] }),
+    ...(equipment.description && { description: equipment.description }),
+    ...(equipment.foundationYear && { foundingDate: equipment.foundationYear }),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: equipment.rua,
+      addressLocality: equipment.cidade || "Franca",
+      addressRegion: equipment.estado || "SP",
+      postalCode: equipment.cep,
+      addressCountry: "BR",
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
       {/* Header */}
       <header className="bg-[#059669] text-white px-4 lg:px-40 py-4">
         <div className="flex items-center gap-4">
-          <a href="/search" className="hover:opacity-80 transition">
+          <Link href="/busca" className="hover:opacity-80 transition">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
-          </a>
-          <h1 className="text-xl font-bold">Perfil do Espaço Cultural</h1>
+          </Link>
+          <span className="text-xl font-bold">Perfil do Espaço Cultural</span>
         </div>
       </header>
+
+      <Breadcrumb
+        items={[
+          { label: "Início", href: "/" },
+          { label: "Busca", href: "/busca" },
+          { label: equipment.name },
+        ]}
+      />
 
       <div className="px-4 lg:px-40 py-6 lg:py-10">
         <div className="max-w-3xl mx-auto bg-white p-4 lg:p-6 rounded-xl shadow-lg">
@@ -223,17 +277,10 @@ export default function EquipmentProfile({
               </div>
             </>
           )}
-
         </div>
       </div>
 
-      <footer className="bg-[#059669] text-white text-center p-6 mt-20">
-        <p>© 2026 <strong>Nós Cultural</strong> - Todos os direitos reservados.</p>
-        <div className="flex justify-center gap-6 mt-4 text-sm">
-          <a href="/privacy" className="hover:underline">Política de Privacidade</a>
-          <a href="/terms" className="hover:underline">Termos de Uso</a>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }
