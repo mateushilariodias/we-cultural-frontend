@@ -1,0 +1,19 @@
+# ads.txt — Authorized Digital Sellers (IAB Tech Lab)
+# https://iabtechlab.com/ads-txt/
+#
+# Este arquivo declara os vendedores autorizados a vender inventário publicitário
+# deste domínio. Redes de anúncios verificam este arquivo antes de exibir ads.
+#
+# Formato de cada entrada:
+#   <domínio-da-rede>, <publisher-id>, <DIRECT|RESELLER>, [certification-authority-id]
+#
+# Exemplos comuns:
+#   Google AdSense:
+#     google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+#
+#   Google Ad Manager:
+#     google.com, XXXXXXX, DIRECT, f08c47fec0942fa0
+#
+# Adicione uma linha por vendedor autorizado ao cadastrar em uma rede de anúncios.
+# Enquanto não houver vendedores, o arquivo declara que nenhum ad programático
+# está autorizado neste domínio — o que é correto para sites sem anúncios.
