@@ -51,6 +51,27 @@ export const metadata: Metadata = {
   description:
     "Plataforma cultural gratuita que conecta artistas de Franca, SP, coletivos culturais e espaços como galerias de arte e teatros. Cadastre-se e faça parte da cena cultural de Franca.",
   alternates: { canonical: "/" },
+  openGraph: {
+    url: SITE_URL,
+    title: "Nós Cultural — Artistas e Cultura de Franca, SP",
+    description:
+      "Plataforma cultural gratuita que conecta artistas de Franca, SP, coletivos culturais e espaços como galerias de arte e teatros. Cadastre-se e faça parte da cena cultural de Franca.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Nós Cultural — Plataforma Cultural de Franca, SP",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Nós Cultural — Artistas e Cultura de Franca, SP",
+    description:
+      "Plataforma cultural gratuita que conecta artistas de Franca, SP, coletivos culturais e espaços como galerias de arte e teatros.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function Home() {
