@@ -87,8 +87,14 @@ export default function EventsCMS() {
         formDataToSend.append('image', image);
       }
 
+      // Recupera o token salvo no login. Adapte a chave 'token' caso seu sistema use outro nome (ex: 'admin_token')
+      const token = localStorage.getItem('token');
+
       const response = await fetch(`${API_URL}/api/events`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
         body: formDataToSend,
       });
 
